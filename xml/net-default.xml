@@ -1,0 +1,5 @@
+<network>
+  <name>build-net</name>
+  <bridge name='virbr0' stp='on' delay='0'/>
+  <ip address='172.168.16.1' netmask='255.255.0.0'/>
+</network>
