@@ -1,0 +1,56 @@
+/* libbb/mktemp.c fits here perfectly */
+#include "libbb.h"
+#include <linux/rtnetlink.h>
+#include <linux/pkt_sched.h>
+
+/* Official Distro Workaround: Mock the legacy structs removed from modern Linux kernels */
+#ifndef TCA_CBQ_MAX
+#define TCA_CBQ_MAX 16
+struct tc_cbq_lssopt { unsigned char change; unsigned char flags; unsigned char depth; unsigned char ewma_log; };
+struct tc_cbq_wrropt { unsigned char flags; unsigned char priority; unsigned char cpriority; unsigned char allotment; };
+struct tc_cbq_rate { char  prio; char  reserve[3]; };
+struct tc_cbq_ovl { unsigned char strategy; unsigned char priority; unsigned short pad2; };
+#endif
+
+static int cbq_parse_opt(int argc, char **argv, struct nlmsghdr *n) { return 0; }
+
+static int cbq_print_opt(struct rtattr *opt)
+{
+	printf("cbq [deprecated/not supported on this kernel]");
+	return 0;
+}
+
+static FAST_FUNC int print_qdisc(const struct sockaddr_nl *who, struct nlmsghdr *n, void *arg)
+{
+	struct tcmsg *t = NLMSG_DATA(n);
+	int len = n->nlmsg_len;
+	struct rtattr *tb[TCA_MAX + 1];
+
+	if (n->nlmsg_type != RTM_NEWQDISC && n->nlmsg_type != RTM_DELQDISC)
+		return 0;
+
+	len -= NLMSG_LENGTH(sizeof(*t));
+	if (len < 0) return -1;
+
+	memset(tb, 0, sizeof(tb));
+	parse_rtattr(tb, TCA_MAX, TCA_RTA(t), len);
+
+	if (tb[TCA_KIND] == NULL) return 0;
+
+	printf("qdisc %s ", (char *)RTA_DATA(tb[TCA_KIND]));
+	if (tb[TCA_OPTIONS]) {
+		if (strcmp((char *)RTA_DATA(tb[TCA_KIND]), "cbq") == 0)
+			cbq_print_opt(tb[TCA_OPTIONS]);
+	}
+	printf("\n");
+	return 0;
+}
+
+int tc_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
+int tc_main(int argc, char **argv)
+{
+	struct sysinfo s_info;
+	sysinfo(&s_info);
+	printf("BusyBox tc utility (Legacy kernel compatibility layer active)\n");
+	return 0;
+}

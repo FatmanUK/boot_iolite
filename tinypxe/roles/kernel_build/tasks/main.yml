@@ -1,0 +1,51 @@
+---
+- name: 'Get Linux finger banner'
+  register: 'reg_finger'
+  uri:
+    url: '{{ kernel_finger_url }}'
+    return_content: yes
+
+- name: 'Clone latest stable Linux repo'
+  vars:
+    crlf: '\n'
+    conts: '{{ reg_finger.content }}'
+    fingers: '{{ conts | regex_replace(crlf, "|") | split("|") }}'
+    stable_fingers: '{{ fingers | select("search", "stable") }}'
+    latest_stable: '{{ stable_fingers | first | split | last }}'
+  git:
+    repo: 'git://{{ kernel_src_domain }}{{ kernel_src_path }}'
+    single_branch: yes
+    version: 'v{{ latest_stable }}'
+    dest: '{{ workdir }}'
+
+- name: 'Configure the kernel build for minimal options'
+  make:
+    chdir: '{{ workdir }}'
+    target: 'allnoconfig'
+
+- name: 'Re-enable options'
+  loop: '{{ kernel_enable_options }}'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - './scripts/config'
+      - '--enable'
+      - 'CONFIG_{{ item }}'
+
+- name: 'Resolve introduced dependency issues'
+  make:
+    chdir: '{{ workdir }}'
+    target: 'olddefconfig'  # weird name for this target
+
+- name: 'Make the kernel'
+  make:
+    chdir: '{{ workdir }}'
+    params:
+      NUM_THREADS: '{{ ansible_processor_nproc }}'
+
+- name: 'Stage the kernel'
+  copy:
+    src: '{{ workdir }}/{{ kernel_built_image }}'
+    dest: '{{ outputdir }}/vmlinuz'
+...
+# vim: set filetype=yaml

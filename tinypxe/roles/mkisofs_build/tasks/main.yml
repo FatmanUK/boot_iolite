@@ -1,0 +1,31 @@
+---
+- name: 'Copy isolinux binaries'
+  loop: '{{ mkisofs_files }}'
+  copy:
+    src: '{{ item }}'
+    dest: '{{ outputdir }}/isolinux/{{ item | basename }}'
+
+- name: 'Templates'
+  loop: '{{ mkisofs_confs }}'
+  template:
+    src: '{{ item }}.j2'
+    dest: '{{ outputdir }}/{{ item }}'
+
+- name: 'Make ISO'
+  command:
+    chdir: '{{ outputdir }}/..'
+    argv:
+      - 'mkisofs'
+      - '-o'
+      - '../{{ mkisofs_iso_filename }}'
+      - '-b'
+      - 'boot/isolinux/isolinux.bin'
+      - '-c'
+      - 'boot/isolinux/boot.cat'
+      - '-no-emul-boot'
+      - '-boot-load-size'
+      - '4'
+      - '-boot-info-table'
+      - '.'
+...
+# vim: set filetype=yaml

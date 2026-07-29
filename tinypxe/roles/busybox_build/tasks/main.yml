@@ -1,0 +1,63 @@
+---
+- name: 'Clone latest Busybox tag'
+  git:
+    repo: '{{ busybox_url }}'
+    single_branch: yes
+    version: '{{ busybox_latest_stable }}'
+    dest: '{{ workdir }}'
+    force: yes
+
+- name: 'Configure the kernel build for minimal options'
+  make:
+    chdir: '{{ workdir }}'
+    target: 'defconfig'
+
+- name: 'Enable options'
+  loop: '{{ busybox_enable_options }}'
+  lineinfile:
+    path: '{{ workdir }}/.config'
+    regex: '# {{ item }} is not set'
+    line: '{{ item }}=y'
+
+- name: 'Disable options'
+  loop: '{{ busybox_disable_options }}'
+  lineinfile:
+    path: '{{ workdir }}/.config'
+    regex: '{{ item }}=y'
+    line: '# {{ item }} is not set'
+
+- name: 'Resolve introduced dependency issues'
+  make:
+    chdir: '{{ workdir }}'
+    target: 'oldconfig'  # weird name for this target
+
+- name: 'Templates'
+  loop: '{{ busybox_templates }}'
+  template:
+    src: '{{ item }}.j2'
+    dest: '{{ workdir }}/{{ item }}'
+    mode: '0644'
+
+- name: 'Make busybox'
+  make:
+    chdir: '{{ workdir }}'
+    target: 'install'
+    params:
+      NUM_THREADS: '{{ ansible_processor_nproc }}'
+
+- name: 'Copy binaries'
+  loop: '{{ busybox_commands }}'
+  copy:
+    src: '{{ workdir }}/{{ item }}'
+    dest: '{{ outputdir }}/bin/{{ item }}'
+
+- name: 'Lots of symlinks'
+  loop: '{{ busybox_symlinks }}'
+  file:
+    state: 'link'
+    src: '/bin/busybox'
+    dest: '{{ outputdir }}/{{ item[1:] }}'
+    force: yes
+    follow: no
+...
+# vim: set filetype=yaml

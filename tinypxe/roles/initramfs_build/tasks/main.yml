@@ -1,0 +1,40 @@
+---
+# temporarily set mknod u+s to get this task working
+- name: 'Create dev nodes'
+  loop:
+    - { path: '/dev/null', type: 'c', major: 1, minor: 3 }
+    - { path: '/dev/zero', type: 'c', major: 1, minor: 5 }
+    - { path: '/dev/random', type: 'c', major: 1, minor: 8 }
+    - { path: '/dev/console', type: 'c', major: 5, minor: 1 }
+    - { path: '/dev/tty', type: 'c', major: 5, minor: 0 }
+  command:
+    creates: '{{ workdir }}/{{ item.path[1:] }}'
+    argv:
+      - 'mknod'
+      - '-m'
+      - '0666'
+      - '{{ workdir }}/{{ item.path[1:] }}'
+      - '{{ item.type }}'
+      - '{{ item.major }}'
+      - '{{ item.minor }}'
+
+- name: 'List files for initramfs'
+  register: 'reg_files'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - 'find'
+      - '.'
+      - '-print0'
+
+- name: 'cpio'
+  vars:
+    files: '{{ reg_files.stdout }}'
+    cmd_cpio: 'cpio --null -ov --format=newc --owner root:root'
+    cmd_gzip: 'gzip -9 >../../{{ outputdir }}/initrd.img'
+  shell: '{{ cmd_cpio }} | {{ cmd_gzip }}'
+  args:
+    chdir: '{{ workdir }}'
+    stdin: '{{ files }}'
+...
+# vim: set filetype=yaml

@@ -1,0 +1,8 @@
+---
+- name: 'Create directories'
+  loop: '{{ dirs }}'
+  file:
+    path: '{{ playbook_dir }}/{{ item }}'
+    state: 'directory'
+...
+# vim: set filetype=yaml

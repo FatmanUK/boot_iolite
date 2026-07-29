@@ -1,0 +1,101 @@
+---
+- name: 'Linux'
+  hosts: 'all'
+  connection: 'local'
+  run_once: yes
+  gather_facts: yes
+  vars:
+    workdir: 'source/kernel'
+    outputdir: 'output/boot'
+    dirs:
+      - '{{ workdir }}'
+      - '{{ outputdir }}'
+  tags:
+    - 'never'
+    - 'linux'
+    - 'kernel'
+  roles:
+    - 'kernel_build'
+
+- name: 'busybox'
+  hosts: 'all'
+  connection: 'local'
+  run_once: yes
+  gather_facts: yes
+  vars:
+    workdir: 'source/busybox'
+    outputdir: 'source/initramfs'
+    dirs:
+      - '{{ workdir }}'
+      - '{{ outputdir }}/bin'
+      - '{{ outputdir }}/sbin'
+      - '{{ outputdir }}/usr/bin'
+      - '{{ outputdir }}/usr/sbin'
+  tags:
+    - 'never'
+    - 'busybox'
+    - 'shell'
+  roles:
+    - 'busybox_build'
+
+- name: 'runit'
+  hosts: 'all'
+  connection: 'local'
+  run_once: yes
+  gather_facts: yes
+  vars:
+    workdir: 'source/runit'
+    outputdir: 'source/initramfs'
+    dirs:
+      - '{{ workdir }}'
+      - '{{ outputdir }}/bin'
+      - '{{ outputdir }}/etc/runit'
+  tags:
+    - 'never'
+    - 'runit'
+    - 'init'
+  roles:
+    - 'runit_build'
+
+- name: 'initramfs'
+  hosts: 'all'
+  connection: 'local'
+  run_once: yes
+  gather_facts: no
+  vars:
+    workdir: 'source/initramfs'
+    outputdir: 'output/boot'
+    dirs:
+      - '{{ workdir }}/dev'
+      - '{{ workdir }}/proc'
+      - '{{ workdir }}/sys'
+      - '{{ workdir }}/root'
+      - '{{ workdir }}/sbin'
+      - '{{ workdir }}/usr/bin'
+      - '{{ workdir }}/usr/sbin'
+      - '{{ outputdir }}'
+  tags:
+    - 'initramfs'
+    - 'initrd'
+  roles:
+    - 'initramfs_build'
+
+- name: 'mkisofs'
+  hosts: 'all'
+  connection: 'local'
+  run_once: yes
+  gather_facts: no
+  vars:
+    workdir: 'source/initramfs'
+    outputdir: 'output/boot'
+    dirs:
+      - '{{ workdir }}'
+      - '{{ outputdir }}'
+      - '{{ outputdir }}/isolinux'
+  tags:
+    - 'mkisofs'
+    - 'iso'
+  roles:
+    - 'mkisofs_build'
+...
+# vim: set filetype=yaml

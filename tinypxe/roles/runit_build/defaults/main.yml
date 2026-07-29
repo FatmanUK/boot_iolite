@@ -1,0 +1,20 @@
+---
+runit_commands:
+  - 'chpst'
+  - 'runit'
+  - 'runit-init'
+  - 'runsv'
+  - 'runsvchdir'
+  - 'runsvdir'
+  - 'sv'
+  - 'svlogd'
+  - 'utmpset'
+runit_latest_stable: '2.3.1'
+runit_ld_conf: '{{ workdir }}/src/conf-ld'
+runit_templates:
+  - '/etc/runit/1'
+  - '/etc/runit/2'
+  - '/etc/runit/3'
+runit_url: 'https://github.com/g-pape/runit'
+...
+# vim: set filetype=yaml

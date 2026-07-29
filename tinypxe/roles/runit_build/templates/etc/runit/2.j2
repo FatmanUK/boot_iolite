@@ -1,0 +1,6 @@
+!/bin/sh
+echo "Runit entering stage 2. Spawning shell..."
+
+while true; do
+    /bin/sh </dev/console >/dev/console 2>&1
+done

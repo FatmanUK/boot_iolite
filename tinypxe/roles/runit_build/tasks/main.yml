@@ -1,0 +1,42 @@
+---
+- name: 'Clone latest Runit tag'
+  git:
+    repo: '{{ runit_url }}'
+    single_branch: yes
+    version: 'v{{ runit_latest_stable }}'
+    dest: '{{ workdir }}'
+    force: yes
+
+- name: 'Configure for static build'
+  copy:
+    content: 'gcc -static'
+    dest: '{{ runit_ld_conf }}'
+
+- name: 'Make binaries'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - 'package/compile'
+
+- name: 'Copy binaries'
+  loop: '{{ runit_commands }}'
+  copy:
+    src: '{{ workdir }}/command/{{ item }}'
+    dest: '{{ outputdir }}/bin/{{ item }}'
+
+- name: 'Create init symlink'
+  file:
+    state: 'link'
+    src: '/bin/runit-init'
+    dest: '{{ outputdir }}/init'
+    force: yes
+    follow: no
+
+- name: 'Templates'
+  loop: '{{ runit_templates }}'
+  template:
+    src: '{{ item[1:] }}.j2'
+    dest: '{{ outputdir }}{{ item }}'
+    mode: '0755'
+...
+# vim: set filetype=yaml
