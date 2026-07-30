@@ -5,13 +5,6 @@
     src: '{{ item }}'
     dest: '{{ outputdir }}/isolinux/{{ item | basename }}'
 
-# BUG: This should be in initramfs_build
-- name: 'Templates'
-  loop: '{{ mkisofs_confs }}'
-  template:
-    src: '{{ item }}.j2'
-    dest: '{{ outputdir }}/{{ item }}'
-
 - name: 'Make ISO'
   command:
     chdir: '{{ outputdir }}/..'
@@ -27,6 +20,11 @@
       - '-boot-load-size'
       - '4'
       - '-boot-info-table'
+      - '-R'
+      - '-J'
+      - '-iso-level'
+      - '3'
+      - '-l'
       - '.'
 ...
 # vim: set filetype=yaml

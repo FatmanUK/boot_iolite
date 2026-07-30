@@ -1,4 +1,10 @@
 ---
+- name: 'Templates'
+  loop: '{{ initramfs_confs }}'
+  template:
+    src: '{{ item }}.j2'
+    dest: '{{ outputdir }}/{{ item }}'
+
 # temporarily set mknod u+s to get this task working
 - name: 'Create dev nodes'
   loop:

@@ -1,0 +1,5 @@
+DEFAULT smallest_linux
+LABEL smallest_linux
+  KERNEL /boot/vmlinuz
+  INITRD /boot/initrd.img
+  APPEND console=ttyS0 earlyprintk=ttyS0 tsc=reliable mitigations=off

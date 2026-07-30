@@ -1,6 +1,4 @@
 ---
-mkisofs_confs:
-  - 'isolinux.cfg'
 mkisofs_files:
   - '/usr/lib/ISOLINUX/isolinux.bin'
   - '/usr/lib/syslinux/modules/bios/ldlinux.c32'
