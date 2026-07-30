@@ -1,16 +1,17 @@
 ---
 kernel_built_image: 'arch/x86/boot/bzImage'
 kernel_enable_options:
-  - '64BIT'
-  - 'BLK_DEV_INITRD'
-  - 'BINFMT_ELF'
-  - 'TTY'
-  - 'VT'
-  - 'SERIAL_8250'
-  - 'EARLY_PRINTK'
-  - 'SERIAL_8250_CONSOLE'
-  - 'CONFIG_DEVTMPFS'
-  - 'DEVTMPFS_MOUNT'
+  - '64BIT'  # required for 64bit support
+  - 'BINFMT_ELF'  # required to run, y'know, stuff
+  - 'BINFMT_SCRIPT'  # required to execute runit stage scripts
+  - 'EARLY_PRINTK'  # required to debug early kernel messages
+  - 'TTY'  # required to see/type anything
+  - 'SERIAL_8250'  # required for serial console
+  - 'SERIAL_8250_CONSOLE'  # required for serial console
+  - 'BLK_DEV_INITRD'  # required for initrd to work
+  - 'DEVTMPFS'  # required for tmpfs
+  - 'DEVTMPFS_MOUNT'  # required for tmpfs
+  - 'VT'  # required for virtual terminals
 kernel_finger_url: 'https://www.kernel.org/finger_banner'
 kernel_src_domain: 'git.kernel.org'
 kernel_src_path: '/pub/scm/linux/kernel/git/stable/linux-stable.git'

@@ -4,5 +4,6 @@
   file:
     path: '{{ playbook_dir }}/{{ item }}'
     state: 'directory'
+    mode: '0750'
 ...
 # vim: set filetype=yaml

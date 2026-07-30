@@ -12,7 +12,7 @@
     content: 'gcc -static'
     dest: '{{ runit_ld_conf }}'
 
-- name: 'Make binaries'
+- name: 'Make runit'
   command:
     chdir: '{{ workdir }}'
     argv:
@@ -23,12 +23,21 @@
   copy:
     src: '{{ workdir }}/command/{{ item }}'
     dest: '{{ outputdir }}/bin/{{ item }}'
+    mode: '0750'
 
 - name: 'Create init symlink'
   file:
     state: 'link'
-    src: '/bin/runit-init'
+    src: 'bin/runit-init'
     dest: '{{ outputdir }}/init'
+    force: yes
+    follow: no
+
+- name: 'Create sbin symlink'
+  file:
+    state: 'link'
+    src: '../bin/runit'
+    dest: '{{ outputdir }}/sbin/runit'
     force: yes
     follow: no
 

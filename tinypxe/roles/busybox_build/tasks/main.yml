@@ -7,7 +7,7 @@
     dest: '{{ workdir }}'
     force: yes
 
-- name: 'Configure the kernel build for minimal options'
+- name: 'Configure the build for minimal options'
   make:
     chdir: '{{ workdir }}'
     target: 'defconfig'
@@ -36,7 +36,7 @@
   template:
     src: '{{ item }}.j2'
     dest: '{{ workdir }}/{{ item }}'
-    mode: '0644'
+    mode: '0640'
 
 - name: 'Make busybox'
   make:
@@ -50,12 +50,31 @@
   copy:
     src: '{{ workdir }}/{{ item }}'
     dest: '{{ outputdir }}/bin/{{ item }}'
+    mode: '0750'
 
-- name: 'Lots of symlinks'
-  loop: '{{ busybox_symlinks }}'
+- name: 'Lots of symlinks 0'
+  loop: '{{ busybox_symlinks_0 }}'
   file:
     state: 'link'
-    src: '/bin/busybox'
+    src: 'bin/busybox'
+    dest: '{{ outputdir }}/{{ item[1:] }}'
+    force: yes
+    follow: no
+
+- name: 'Lots of symlinks 1'
+  loop: '{{ busybox_symlinks_1 }}'
+  file:
+    state: 'link'
+    src: '../bin/busybox'
+    dest: '{{ outputdir }}/{{ item[1:] }}'
+    force: yes
+    follow: no
+
+- name: 'Lots of symlinks 2'
+  loop: '{{ busybox_symlinks_2 }}'
+  file:
+    state: 'link'
+    src: '../../bin/busybox'
     dest: '{{ outputdir }}/{{ item[1:] }}'
     force: yes
     follow: no

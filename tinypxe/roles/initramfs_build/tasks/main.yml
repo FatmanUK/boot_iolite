@@ -18,23 +18,14 @@
       - '{{ item.major }}'
       - '{{ item.minor }}'
 
-- name: 'List files for initramfs'
-  register: 'reg_files'
-  command:
-    chdir: '{{ workdir }}'
-    argv:
-      - 'find'
-      - '.'
-      - '-print0'
-
-- name: 'cpio'
-  vars:
-    files: '{{ reg_files.stdout }}'
-    cmd_cpio: 'cpio --null -ov --format=newc --owner root:root'
-    cmd_gzip: 'gzip -9 >../../{{ outputdir }}/initrd.img'
-  shell: '{{ cmd_cpio }} | {{ cmd_gzip }}'
+# TODO: make module
+- name: 'Pack initramfs archive'
+  shell: |
+    set -o pipefail
+    export LC_ALL=C LANG=C
+    find . -print0 | cpio --null -ov --format=newc --owner root:root | gzip -9 > ../../{{ outputdir }}/initrd.img
   args:
     chdir: '{{ workdir }}'
-    stdin: '{{ files }}'
+    executable: '/bin/bash'
 ...
 # vim: set filetype=yaml

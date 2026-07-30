@@ -5,6 +5,7 @@
     src: '{{ item }}'
     dest: '{{ outputdir }}/isolinux/{{ item | basename }}'
 
+# BUG: This should be in initramfs_build
 - name: 'Templates'
   loop: '{{ mkisofs_confs }}'
   template:

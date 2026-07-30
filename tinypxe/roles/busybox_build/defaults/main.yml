@@ -7,7 +7,9 @@ busybox_disable_options:
 busybox_enable_options:
   - 'CONFIG_STATIC'
 busybox_latest_stable: '1_36_1'
-busybox_symlinks:
+busybox_symlinks_0:
+  - '/linuxrc'
+busybox_symlinks_1:
   - '/bin/arch'
   - '/bin/ash'
   - '/bin/base32'
@@ -100,7 +102,6 @@ busybox_symlinks:
   - '/bin/vi'
   - '/bin/watch'
   - '/bin/zcat'
-  - '/linuxrc'
   - '/sbin/acpid'
   - '/sbin/adjtimex'
   - '/sbin/arp'
@@ -172,6 +173,7 @@ busybox_symlinks:
   - '/sbin/vconfig'
   - '/sbin/watchdog'
   - '/sbin/zcip'
+busybox_symlinks_2:
   - '/usr/bin/['
   - '/usr/bin/[['
   - '/usr/bin/ascii'
