@@ -1,17 +1,28 @@
 ---
 kernel_built_image: 'arch/x86/boot/bzImage'
 kernel_enable_options:
-  - '64BIT'  # required for 64bit support
-  - 'BINFMT_ELF'  # required to run, y'know, stuff
-  - 'BINFMT_SCRIPT'  # required to execute runit stage scripts
-  - 'EARLY_PRINTK'  # required to debug early kernel messages
-  - 'TTY'  # required to see/type anything
-  - 'SERIAL_8250'  # required for serial console
-  - 'SERIAL_8250_CONSOLE'  # required for serial console
-  - 'BLK_DEV_INITRD'  # required for initrd to work
-  - 'DEVTMPFS'  # required for tmpfs
-  - 'DEVTMPFS_MOUNT'  # required for tmpfs
-  - 'VT'  # required for virtual terminals
+  - '64BIT'               # required for 64bit support
+  - 'BINFMT_ELF'          # required to run, y'know, stuff
+  - 'BINFMT_SCRIPT'       # required to execute runit stage scripts
+  - 'EARLY_PRINTK'        # required to debug early kernel messages
+  - 'TTY'                 # required to see/type anything
+  - 'SERIAL_8250'         # required for serial console
+  - 'SERIAL_8250_CONSOLE' # required for serial console
+  - 'BLK_DEV_INITRD'      # required for initrd to work
+  - 'DEVTMPFS'            # required for tmpfs
+  - 'DEVTMPFS_MOUNT'      # required for tmpfs
+  - 'TMPFS'               # required for tmpfs
+  - 'TMPFS_POSIX_ACL'     # not required but highly recommended
+  - 'TMPFS_XATTR'         # not required but highly recommended
+  - 'VT'                  # required for virtual terminals
+  - 'RTC_CLASS'           # required for hwclock
+  - 'RTC_INTF_DEV'        # required for hwclock
+  - 'RTC_DRV_CMOS'        # required for hwclock
+  - 'NET'                 # required for networking
+  - 'INET'                # required for networking
+  - 'NETDEVICES'          # required for networking
+  - 'ETHERNET'            # required for networking
+  - 'IP_PNP'              # required for kernel IP assignment at boot
 kernel_finger_url: 'https://www.kernel.org/finger_banner'
 kernel_src_domain: 'git.kernel.org'
 kernel_src_path: '/pub/scm/linux/kernel/git/stable/linux-stable.git'

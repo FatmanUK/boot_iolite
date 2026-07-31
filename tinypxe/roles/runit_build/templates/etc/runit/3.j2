@@ -1,3 +1,8 @@
 #!/bin/sh
-echo "Runit entering stage 3. System shutting down..."
-umount -a -r
+echo "Stage 3: System shutdown"
+
+# Bring down all services cleanly (gives them up to 7 seconds)
+/bin/sv force-stop /var/service/*
+/bin/sv exit /var/service/*
+
+/bin/umount -a -r

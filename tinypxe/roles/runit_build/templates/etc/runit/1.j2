@@ -1,6 +1,23 @@
 #!/bin/sh
-echo "Runit entering stage 1. Mounting systems..."
-mount -t proc none /proc
-mount -t sysfs none /sys
-mount -t devtmpfs none /dev 2>/dev/null
+echo "Stage 1: System boot"
+
+/bin/mount -t proc none /proc
+/bin/mount -t sysfs none /sys
+/bin/mount -t devtmpfs none /dev 2>/dev/null
+/bin/mkdir -p /dev/pts /dev/shm
+/bin/mount -t devpts devpts /dev/pts
+/bin/mount -t tmpfs tmpfs /dev/shm
+
+/sbin/hwclock -s
+
+cat <<eof >/etc/passwd
+root:x:0:0:root:/root:/bin/sh
+eof
+
+cat <<eof >/bin/shutdown
+#!/bin/sh
+killall runsvdir
+eof
+chmod u+x /bin/shutdown
+
 exit 0

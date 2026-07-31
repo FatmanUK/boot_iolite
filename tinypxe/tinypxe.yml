@@ -50,12 +50,15 @@
       - '{{ workdir }}'
       - '{{ outputdir }}/bin'
       - '{{ outputdir }}/etc/runit'
+      - '{{ outputdir }}/etc/sv'
+      - '{{ outputdir }}/var/service'
   tags:
     - 'never'
     - 'runit'
     - 'init'
   roles:
     - 'runit_build'
+    - 'runit_services_create'
 
 - name: 'initramfs'
   hosts: 'all'

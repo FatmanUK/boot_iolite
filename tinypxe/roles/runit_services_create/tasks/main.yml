@@ -1,0 +1,30 @@
+---
+- name: 'Create service directories'
+  loop: '{{ services }}'
+  file:
+    state: 'directory'
+    path: '{{ outputdir }}/etc/sv/{{ item.name }}/log'
+    mode: '0750'
+
+- name: 'Create log services'
+  loop: '{{ services }}'
+  copy:
+    content: '{{ services_log }}'
+    dest: '{{ outputdir }}/etc/sv/{{ item.name }}/log/run'
+    mode: '0750'
+
+- name: 'Create services'
+  loop: '{{ services }}'
+  template:
+    src: '{{ services_run[1:] }}.j2'
+    dest: '{{ outputdir }}/{{ services_run[1:] }}'
+    mode: '0750'
+
+- name: 'Create service links'
+  loop: '{{ services }}'
+  file:
+    state: 'link'
+    src: '../../etc/sv/{{ item.name }}'
+    dest: '{{ outputdir }}/var/service/{{ item.name }}'
+...
+# vim: set filetype=yaml

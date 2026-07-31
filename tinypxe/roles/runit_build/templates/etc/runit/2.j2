@@ -1,4 +1,4 @@
 #!/bin/sh
-echo "Runit entering stage 2. Spawning shell..."
+echo "Stage 2: System supervision"
 
-/usr/bin/setsid /bin/cttyhack /bin/sh
+exec /usr/bin/env - PATH=$PATH /bin/runsvdir -P /var/service

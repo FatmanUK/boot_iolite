@@ -1,0 +1,10 @@
+---
+services:
+  - name: 'get-hostname'
+  - name: 'single-shell'
+services_log: |
+  #!/bin/sh
+  exec logger -t {{ item.name }}
+services_run: '/etc/sv/{{ item.name }}/run'
+...
+# vim: set filetype=yaml
