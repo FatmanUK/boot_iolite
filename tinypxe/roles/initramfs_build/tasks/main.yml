@@ -1,9 +1,10 @@
 ---
+# TODO maybe de-template this, too smart
 - name: 'Templates'
   loop: '{{ initramfs_confs }}'
   template:
     src: '{{ item }}.j2'
-    dest: '{{ outputdir }}/{{ item }}'
+    dest: '{{ outputdir }}/isolinux/{{ item }}'
 
 # temporarily set mknod u+s to get this task working
 - name: 'Create dev nodes'
