@@ -1,12 +1,11 @@
 ---
-# TODO maybe de-template this, too smart
-- name: 'Templates'
-  loop: '{{ initramfs_confs }}'
+- name: 'Template isolinux configuration'
+  vars:
+    isolinux_template: 'isolinux.cfg'
   template:
-    src: '{{ item }}.j2'
-    dest: '{{ outputdir }}/isolinux/{{ item }}'
+    src: '{{ isolinux_template }}.j2'
+    dest: '{{ outputdir }}/isolinux/{{ isolinux_template }}'
 
-# temporarily set mknod u+s to get this task working
 - name: 'Create dev nodes'
   loop:
     - { path: '/dev/null', type: 'c', major: 1, minor: 3 }
@@ -25,14 +24,9 @@
       - '{{ item.major }}'
       - '{{ item.minor }}'
 
-# TODO: make module
 - name: 'Pack initramfs archive'
-  shell: |
-    set -o pipefail
-    export LC_ALL=C LANG=C
-    find . -print0 | cpio --null -ov --format=newc --owner root:root | gzip -9 > ../../{{ outputdir }}/initrd.img
-  args:
+  initrd_build:
     chdir: '{{ workdir }}'
-    executable: '/bin/bash'
+    dest: '{{ outputdir }}/initrd.img'
 ...
 # vim: set filetype=yaml

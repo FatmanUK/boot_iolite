@@ -1,5 +1,1 @@
----
-initramfs_confs:
-  - 'isolinux.cfg'
-...
-# vim: set filetype=yaml
+

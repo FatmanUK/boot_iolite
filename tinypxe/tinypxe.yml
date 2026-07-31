@@ -74,6 +74,7 @@
       - '{{ workdir }}/usr/bin'
       - '{{ workdir }}/usr/sbin'
       - '{{ outputdir }}'
+      - '{{ outputdir }}/isolinux'
   tags:
     - 'initramfs'
     - 'initrd'
@@ -91,11 +92,10 @@
     dirs:
       - '{{ workdir }}'
       - '{{ outputdir }}'
-      - '{{ outputdir }}/isolinux'
   tags:
     - 'mkisofs'
     - 'iso'
   roles:
-    - 'mkisofs_build'
+    - 'iso_build'
 ...
 # vim: set filetype=yaml
