@@ -1,0 +1,6 @@
+{
+  "ANSIBLE_MODULE_ARGS": {
+    "chdir": "../source/initramfs/",
+    "dest": "../output/boot/initrd2.img"
+  }
+}
