@@ -1,7 +1,14 @@
 #!/bin/sh
 
-GW=$(ip a | grep gw | cut -d\  -f2)
-wget -O - http://${GW}/iolite/api/v1/fqdn?id=00:00:00:00:00:00 >/etc/hostname
+# BUG this does not work at all. Get IP again somehow.
+
+#GW=$(ip a | grep gw | cut -d\  -f2)
+#wget -O - http://${GW}/iolite/api/v1/fqdn?id=00:00:00:00:00:00 >/etc/hostname
+
+cat <<eof >/etc/hostname
+building.dreamtrack.lab
+eof
+
 /bin/hostname -F /etc/hostname
 
-exec pause
+exec sleep
