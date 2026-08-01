@@ -35,3 +35,6 @@ iolite
 *.iso
 tinypxe/output/
 tinypxe/source/
+undionly.kpxe
+ipxe.efi
+ipxe-arm64.efi
