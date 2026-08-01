@@ -12,3 +12,11 @@ A 7.5MB distro? Sure, if a minimal kernel plus statically-linked Busybox and Run
 ## Bugs
 
   * serial console only --- I'd like to use that AND tty0 if possible
+
+## Before Use
+
+Download the boot images into ./tftproot.
+
+  * undionly.kpxe
+  * ipxe.efi
+  * ipxe-arm64.efi
