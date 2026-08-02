@@ -3,6 +3,7 @@ services:
   - 'get-hostname'
   - 'single-shell'
   - 'udhcpc'
+  - 'iolite-build'
 services_dhcp_lease_s: 3600
 services_log: |
   #!/bin/sh

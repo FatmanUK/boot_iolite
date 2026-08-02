@@ -1,5 +1,0 @@
-#!ipxe
-echo Bootstrapping iolite...
-kernel http://172.168.16.1/vmlinuz console=ttyS0 earlyprintk=ttyS0 tsc=reliable
-initrd http://172.168.16.1/initrd.img
-boot

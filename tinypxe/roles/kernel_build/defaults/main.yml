@@ -8,6 +8,7 @@ kernel_enable_options:
   - 'TTY'                 # required to see/type anything
   - 'SERIAL_8250'         # required for serial console
   - 'SERIAL_8250_CONSOLE' # required for serial console
+  - 'VGA_CONSOLE'         # required to render text on VGA hardware
   - 'BLK_DEV_INITRD'      # required for initrd to work
   - 'DEVTMPFS'            # required for tmpfs
   - 'DEVTMPFS_MOUNT'      # required for tmpfs
@@ -36,6 +37,11 @@ kernel_enable_options:
   - 'IGC'                 # required for modern Intel 2.5GbE
   - 'IGB'                 # required for modern Intel GbE
   - 'PACKET'              # required for raw sockets
+  - 'INPUT'               # required for the input subsystem
+  - 'INPUT_KEYBOARD'      # required for keyboards
+  - 'SERIO'               # required for serial I/O bus
+  - 'SERIO_I8042'         # required for the keyboard controller
+  - 'KEYBOARD_ATKBD'      # required for the keyboard protocol
 kernel_finger_url: 'https://www.kernel.org/finger_banner'
 kernel_src_domain: 'git.kernel.org'
 kernel_src_path: '/pub/scm/linux/kernel/git/stable/linux-stable.git'

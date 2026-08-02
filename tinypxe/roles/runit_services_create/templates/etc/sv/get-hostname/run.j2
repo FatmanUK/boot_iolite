@@ -1,14 +1,19 @@
 #!/bin/sh
 
-# BUG this does not work at all. Get IP again somehow.
+sleep 5  # hmm
 
-#GW=$(ip a | grep gw | cut -d\  -f2)
-#wget -O - http://${GW}/iolite/api/v1/fqdn?id=00:00:00:00:00:00 >/etc/hostname
+GW=$(/sbin/ip r | /bin/grep default | /bin/grep eth0 | /usr/bin/cut -d\  -f3)
+MAC=$(/sbin/ip -o l | /bin/grep eth0 | /usr/bin/cut -d\\ -f2 | /usr/bin/awk '{print $2}')
+eval $(/usr/bin/wget -O- http://${GW}:80/${MAC})
+
+/bin/cat <<eof >/etc/hostname
+${HOSTNAME}
+eof
 
 # To apply new hostname:
 # sv restart get-hostname
 /bin/hostname -F /etc/hostname
 
 while true; do
-	sleep 86400
+	/bin/sleep 86400
 done
