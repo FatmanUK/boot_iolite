@@ -3,14 +3,14 @@
   loop: '{{ services }}'
   file:
     state: 'directory'
-    path: '{{ outputdir }}/etc/sv/{{ item.name }}/log'
+    path: '{{ outputdir }}/etc/sv/{{ item }}/log'
     mode: '0750'
 
 - name: 'Create log services'
   loop: '{{ services }}'
   copy:
     content: '{{ services_log }}'
-    dest: '{{ outputdir }}/etc/sv/{{ item.name }}/log/run'
+    dest: '{{ outputdir }}/etc/sv/{{ item }}/log/run'
     mode: '0750'
 
 - name: 'Create services'
@@ -24,7 +24,7 @@
   loop: '{{ services }}'
   file:
     state: 'link'
-    src: '../../etc/sv/{{ item.name }}'
-    dest: '{{ outputdir }}/var/service/{{ item.name }}'
+    src: '../../etc/sv/{{ item }}'
+    dest: '{{ outputdir }}/var/service/{{ item }}'
 ...
 # vim: set filetype=yaml

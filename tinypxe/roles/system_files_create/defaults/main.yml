@@ -1,0 +1,12 @@
+---
+system_files:
+  - path: '/etc/passwd'
+    mode: '0644'
+  - path: '/etc/hostname'
+    mode: '0644'
+  - path: '/sbin/reboot'
+    mode: '0750'
+  - path: '/usr/share/udhcpc/default.script'
+    mode: '0750'
+...
+# vim: set filetype=yaml

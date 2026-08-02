@@ -1,0 +1,29 @@
+#!/bin/sh
+# Minimal udhcpc setup script
+
+case "$1" in
+    deconfig)
+        # Wipe the interface clean before getting a lease
+        ip addr flush dev $interface
+        ip link set dev $interface up
+        ;;
+        
+    bound|renew)
+        # 1. Apply the IP address and subnet mask
+        ip addr add $ip/$mask dev $interface
+        
+        # 2. Add the default gateway (router)
+        if [ -n "$router" ]; then
+            ip route add default via $router dev $interface
+        fi
+        
+        # 3. (Optional) Set up DNS resolution
+        if [ -n "$dns" ]; then
+            # Clear the old resolv.conf
+            > /etc/resolv.conf
+            for i in $dns; do
+                echo "nameserver $i" >> /etc/resolv.conf
+            done
+        fi
+        ;;
+esac

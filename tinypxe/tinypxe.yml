@@ -70,18 +70,21 @@
     outputdir: 'output/boot'
     dirs:
       - '{{ workdir }}/dev'
+      - '{{ workdir }}/etc'
       - '{{ workdir }}/proc'
       - '{{ workdir }}/sys'
       - '{{ workdir }}/root'
       - '{{ workdir }}/sbin'
       - '{{ workdir }}/usr/bin'
       - '{{ workdir }}/usr/sbin'
+      - '{{ workdir }}/usr/share/udhcpc'
       - '{{ outputdir }}'
       - '{{ outputdir }}/isolinux'
   tags:
     - 'initramfs'
     - 'initrd'
   roles:
+    - 'system_files_create'
     - 'initramfs_build'
 
 - name: 'mkisofs'

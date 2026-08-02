@@ -23,6 +23,19 @@ kernel_enable_options:
   - 'NETDEVICES'          # required for networking
   - 'ETHERNET'            # required for networking
   - 'IP_PNP'              # required for kernel IP assignment at boot
+  - 'PM'                  # required for ACPI
+  - 'ACPI'                # required for power-off ACPI events
+  - 'PCI'                 # required to enumerate hardware
+  - 'VIRTIO_MENU'         # required for the virtio subsystem
+  - 'VIRTIO_PCI'          # required to find virtio devices
+  - 'VIRTIO_NET'          # required for virtio networking
+  - 'E1000'               # required for Intel PRO/1000 GbE
+  - 'E1000E'              # required for PCIe Intel GbE NICs
+  - '8139CP'              # required for older Realtek NICs
+  - 'R8169'               # required for PCIe Realtek GbE NICs
+  - 'IGC'                 # required for modern Intel 2.5GbE
+  - 'IGB'                 # required for modern Intel GbE
+  - 'PACKET'              # required for raw sockets
 kernel_finger_url: 'https://www.kernel.org/finger_banner'
 kernel_src_domain: 'git.kernel.org'
 kernel_src_path: '/pub/scm/linux/kernel/git/stable/linux-stable.git'

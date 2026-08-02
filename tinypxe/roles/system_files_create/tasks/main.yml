@@ -1,0 +1,9 @@
+---
+- name: 'Template system files'
+  loop: '{{ system_files }}'
+  template:
+    src: '{{ item.path[1:] }}.j2'
+    dest: '{{ workdir }}{{ item.path }}'
+    mode: '{{ item.mode }}'
+...
+# vim: set filetype=yaml

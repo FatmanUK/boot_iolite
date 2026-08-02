@@ -16,15 +16,15 @@
   loop: '{{ busybox_enable_options }}'
   lineinfile:
     path: '{{ workdir }}/.config'
-    regex: '# {{ item }} is not set'
-    line: '{{ item }}=y'
+    regex: '# CONFIG_{{ item }} is not set'
+    line: 'CONFIG_{{ item }}=y'
 
 - name: 'Disable options'
   loop: '{{ busybox_disable_options }}'
   lineinfile:
     path: '{{ workdir }}/.config'
-    regex: '{{ item }}=y'
-    line: '# {{ item }} is not set'
+    regex: 'CONFIG_{{ item }}=y'
+    line: '# CONFIG_{{ item }} is not set'
 
 - name: 'Resolve introduced dependency issues'
   make:

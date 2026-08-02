@@ -10,14 +10,6 @@ echo "Stage 1: System boot"
 
 /sbin/hwclock -s
 
-cat <<eof >/etc/passwd
-root:x:0:0:root:/root:/bin/sh
-eof
-
-cat <<eof >/bin/shutdown
-#!/bin/sh
-killall runsvdir
-eof
-chmod u+x /bin/shutdown
+/sbin/ip link set dev lo up
 
 exit 0

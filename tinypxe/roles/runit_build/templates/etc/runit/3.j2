@@ -5,4 +5,6 @@ echo "Stage 3: System shutdown"
 /bin/sv force-stop /var/service/*
 /bin/sv exit /var/service/*
 
+# Unmount disks cleanly
+/bin/sync
 /bin/umount -a -r

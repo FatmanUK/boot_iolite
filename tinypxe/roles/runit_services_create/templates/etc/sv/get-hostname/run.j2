@@ -5,10 +5,10 @@
 #GW=$(ip a | grep gw | cut -d\  -f2)
 #wget -O - http://${GW}/iolite/api/v1/fqdn?id=00:00:00:00:00:00 >/etc/hostname
 
-cat <<eof >/etc/hostname
-building.dreamtrack.lab
-eof
-
+# To apply new hostname:
+# sv restart get-hostname
 /bin/hostname -F /etc/hostname
 
-exec sleep
+while true; do
+	sleep 86400
+done

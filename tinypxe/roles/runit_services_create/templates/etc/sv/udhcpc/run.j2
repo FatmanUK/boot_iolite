@@ -1,0 +1,8 @@
+#!/bin/sh
+
+LEASE_S={{ services_dhcp_lease_s }}
+
+while true; do
+	/sbin/udhcpc -i eth0
+	/bin/sleep ${LEASE_S}
+done

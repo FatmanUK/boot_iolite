@@ -2,10 +2,13 @@
 busybox_commands:
   - 'busybox'
 busybox_disable_options:
-  - 'CONFIG_TC'
-  - 'CONFIG_FEATURE_TC_INGRESS'
+  - 'TC'
+  - 'FEATURE_TC_INGRESS'
 busybox_enable_options:
-  - 'CONFIG_STATIC'
+  - 'STATIC'
+#  - 'HALT'  # wait, maybe not needed
+#  - 'POWEROFF'
+#  - 'REBOOT'
 busybox_latest_stable: '1_36_1'
 busybox_symlinks_0:
   - '/linuxrc'
