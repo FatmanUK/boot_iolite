@@ -1,8 +1,10 @@
 #!/bin/sh
 
-sleep 5  # hmm
+GW=''
+while [ "x${GW}x" == "xx" ]; do
+	GW=$(/sbin/ip r | /bin/grep default | /bin/grep eth0 | /usr/bin/cut -d\  -f3)
+done
 
-GW=$(/sbin/ip r | /bin/grep default | /bin/grep eth0 | /usr/bin/cut -d\  -f3)
 MAC=$(/sbin/ip -o l | /bin/grep eth0 | /usr/bin/cut -d\\ -f2 | /usr/bin/awk '{print $2}')
 eval $(/usr/bin/wget -O- http://${GW}:80/${MAC})
 
@@ -14,6 +16,4 @@ eof
 # sv restart get-hostname
 /bin/hostname -F /etc/hostname
 
-while true; do
-	/bin/sleep 86400
-done
+exec /bin/sleep 86400
