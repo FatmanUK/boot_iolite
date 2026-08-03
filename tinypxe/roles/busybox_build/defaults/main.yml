@@ -9,6 +9,11 @@ busybox_enable_options:
 #  - 'HALT'  # wait, maybe not needed
 #  - 'POWEROFF'
 #  - 'REBOOT'
+  - 'MOUNT'
+  - 'UMOUNT'
+  - 'FDISK'
+  - 'MKE2FS'
+  - 'MKFS_EXT2'
 busybox_latest_stable: '1_36_1'
 busybox_symlinks_0:
   - '/linuxrc'

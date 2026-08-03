@@ -42,6 +42,22 @@ kernel_enable_options:
   - 'SERIO'               # required for serial I/O bus
   - 'SERIO_I8042'         # required for the keyboard controller
   - 'KEYBOARD_ATKBD'      # required for the keyboard protocol
+  - 'BLOCK'               # required for the block device subsystem
+  - 'BLK_DEV'             # required for generic block device support
+  - 'PARTITION_ADVANCED'  # required for reading disk partition tables
+  - 'MSDOS_PARTITION'     # required for reading traditional MBRs
+  - 'EFI_PARTITION'       # required for modern GPT partition tables
+  - 'VIRTIO_BLK'          # required for VirtIO block device driver
+  - 'ATA'                 # required for the ATA/SATA subsystem
+  - 'SATA_AHCI'           # required for AHCI SATA
+  - 'BLK_DEV_SD'          # required for ATA as SCSI (/dev/sd)
+  - 'EXT4_FS'             # required for ext2, ext3, and ext4
+  - 'FS_MBCACHE'          # auto-selected by ext4
+  - 'JBD2'                # auto-selected by ext4
+  - 'XFS_FS'              # required for XFS
+  - 'LIBCRC32C'           # auto-selected by xfs
+  - 'CRYPTO_CRC32C'       # auto-selected by xfs
+  - 'EXPORTFS'            # auto-selected by xfs
 kernel_finger_url: 'https://www.kernel.org/finger_banner'
 kernel_src_domain: 'git.kernel.org'
 kernel_src_path: '/pub/scm/linux/kernel/git/stable/linux-stable.git'
