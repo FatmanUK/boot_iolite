@@ -1,0 +1,12 @@
+---
+xfsprogs_binaries:
+  - name: 'mkfs.xfs'
+    libs0: 'mkfs/xfs_mkfs.o $(find mkfs/ -maxdepth 1 -name "*.o" ! -name "xfs_mkfs.o")'
+    libs1: ''
+  - name: 'xfs_repair'
+    libs0: 'repair/xfs_repair.o $(find repair/ -maxdepth 1 -name "*.o" ! -name "xfs_repair.o")'
+    libs1: 'libxcmd/.libs/libxcmd.a libxlog/.libs/libxlog.a'
+xfsprogs_latest_stable: '7.1.1'
+xfsprogs_url: 'https://kernel.googlesource.com/pub/scm/fs/xfs/xfsprogs-dev'
+...
+# vim: set filetype=yaml

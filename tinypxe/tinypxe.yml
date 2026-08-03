@@ -38,6 +38,24 @@
   roles:
     - 'busybox_build'
 
+- name: 'xfsprogs'
+  hosts: 'all'
+  connection: 'local'
+  run_once: yes
+  gather_facts: yes
+  vars:
+    workdir: 'source/xfsprogs'
+    outputdir: 'source/initramfs'
+    dirs:
+      - '{{ workdir }}'
+      - '{{ outputdir }}/usr/bin'
+  tags:
+    - 'never'
+    - 'xfsprogs'
+    - 'xfs'
+  roles:
+    - 'xfsprogs_build'
+
 - name: 'runit'
   hosts: 'all'
   connection: 'local'

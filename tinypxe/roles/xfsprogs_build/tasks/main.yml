@@ -1,0 +1,61 @@
+---
+# NOTE: needs libinih-dev, liburcu-dev, uuid-dev preinstalled
+- name: 'Clone latest xfsprogs tag'
+  git:
+    repo: '{{ xfsprogs_url }}'
+    single_branch: yes
+    version: 'v{{ xfsprogs_latest_stable }}'
+    dest: '{{ workdir }}'
+    force: yes
+
+- name: 'Reset and run clean configuration'
+  make:
+    chdir: '{{ workdir }}'
+    target: 'realclean'
+
+- name: 'Remove previously built static binaries'
+  loop: '{{ xfsprogs_binaries }}'
+  file:
+    state: 'absent'
+    path: '{{ workdir }}/{{ item.name }}_static'
+
+- name: 'Configure the source tree normally'
+  make:
+    chdir: '{{ workdir }}'
+    target: 'configure'
+    params:
+      LOCAL_CONFIGURE_OPTIONS: '--enable-static --disable-shared'
+
+- name: 'Build intermediate object files'
+  make:
+    chdir: '{{ workdir }}'
+    params:
+      DEBUG: '-DNDEBUG'
+      OPTIMIZER: '-O2'
+
+- name: 'Manually force link standalone static repair/mkfs binaries'
+  vars:
+    common_libs0: 'libfrog/.libs/libfrog.a libxfs/.libs/libxfs.a'
+    common_libs1: '-lpthread -luuid -lblkid -lurcu -linih'
+    item_libs0: '{{ item.libs0 }} {{ common_libs0 }}'
+    item_libs1: '{{ item.libs1 }} {{ common_libs1 }}'
+    item_libs: '{{ item_libs0 }} {{ item_libs1 }}'
+  loop: '{{ xfsprogs_binaries }}'
+  shell:
+    chdir: '{{ workdir }}'
+    cmd: 'gcc -static -o {{ item.name }}_static {{ item_libs }}'
+
+- name: 'Strip debugging symbols to minimize binary footprint'
+  loop: '{{ xfsprogs_binaries }}'
+  command:
+    chdir: '{{ workdir }}'
+    cmd: "strip {{ item.name }}_static"
+
+- name: 'Deploy static utilities to PXE/Initramfs assets directory'
+  loop: '{{ xfsprogs_binaries }}'
+  copy:
+    src: '{{ workdir }}/{{ item.name }}_static'
+    dest: '{{ outputdir }}/usr/bin/{{ item.name }}'
+    mode: '0750'
+...
+# vim: set filetype=yaml
