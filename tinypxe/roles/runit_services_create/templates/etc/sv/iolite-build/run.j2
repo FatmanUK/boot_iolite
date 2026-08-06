@@ -1,5 +1,8 @@
 #!/bin/sh
 
-# iolite-build
+# Reset environment parameters
+export SVDIR='/var/service'
+cd /
 
-# download and run script
+#exec /usr/bin/setsid /bin/sh -c 'exec /bin/sh /opt/iolite-build.sh </dev/tty2 >/dev/tty2 2>&1'
+exec /usr/bin/setsid /bin/sh -c '/bin/sh /opt/iolite-build.sh </dev/tty2 >/dev/tty2 2>&1; /bin/sv down .'

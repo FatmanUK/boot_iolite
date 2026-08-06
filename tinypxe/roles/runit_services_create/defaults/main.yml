@@ -1,13 +1,12 @@
 ---
 services:
-  - 'get-hostname'
   - 'single-shell'
   - 'udhcpc'
   - 'iolite-build'
 services_dhcp_lease_s: 3600
 services_log: |
   #!/bin/sh
-  exec logger -t {{ item }}
+  exec /usr/sbin/svlogd -tt /var/log/{{ item }}
 services_run: '/etc/sv/{{ item }}/run'
 ...
 # vim: set filetype=yaml

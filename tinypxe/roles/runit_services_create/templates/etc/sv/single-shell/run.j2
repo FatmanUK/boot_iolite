@@ -1,6 +1,7 @@
 #!/bin/sh
 
-sleep 5
-
+# Reset environment parameters
+export SVDIR='/var/service'
 cd /
-exec /usr/bin/setsid /bin/cttyhack /bin/sh
+
+exec /usr/bin/setsid /bin/sh -c 'exec /bin/sh </dev/tty4 >/dev/tty4 2>&1'

@@ -13,6 +13,13 @@
     dest: '{{ outputdir }}/etc/sv/{{ item }}/log/run'
     mode: '0750'
 
+- name: 'Create log directories'
+  loop: '{{ services }}'
+  file:
+    state: 'directory'
+    path: '{{ outputdir }}/var/log/{{ item }}'
+    mode: '0750'
+
 - name: 'Create services'
   loop: '{{ services }}'
   template:
