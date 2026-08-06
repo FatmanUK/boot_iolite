@@ -3,6 +3,7 @@ module iolite
 go 1.25.0
 
 require (
+	github.com/FatmanUK/fatgo/callwheel v0.0.4
 	github.com/glebarez/sqlite v1.11.0
 	github.com/insomniacslk/dhcp v0.0.0-20260719225207-c76316d4aa82
 	github.com/pin/tftp v2.1.0+incompatible

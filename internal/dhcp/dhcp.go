@@ -2,8 +2,8 @@ package dhcp
 
 import (
 	"fmt"
+	cw "github.com/FatmanUK/fatgo/callwheel"
 	"github.com/insomniacslk/dhcp/dhcpv4"
-	//"github.com/insomniacslk/dhcp/iana"
 	"golang.org/x/net/ipv4"
 	"net"
 )
@@ -25,6 +25,8 @@ const MSG_RECEIVED_SS = "Received %s from MAC: %s"
 const MSG_DHCPACK_SENT_SS = "Sent DHCP Ack of %s to MAC %s"
 const MSG_DHCPOFFER_SENT_SS = "Sent DHCP Offer of %s to MAC %s"
 const MSG_TFTP_REPLY_S = "TFTP reply sent to %s"
+
+var DhcpOfferTimeouts *cw.CallWheel
 
 // BUG: this system isn't right.
 // use gorm for this?
@@ -283,6 +285,9 @@ func RecordOffer(s string) {
 		offersMade = make(map[string]bool)
 	}
 	offersMade[s] = true
+	DhcpOfferTimeouts.Insert(30, func(){
+		RescindOffer(s)
+	})
 }
 
 func RescindOffer(s string) {

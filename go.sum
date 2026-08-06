@@ -1,3 +1,5 @@
+github.com/FatmanUK/fatgo/callwheel v0.0.4 h1:OsOLguHjFv8t1qxXj5ZGdhFAr53+8RuxBJtmeQoj7Xs=
+github.com/FatmanUK/fatgo/callwheel v0.0.4/go.mod h1:IBdaRpHNkPZ3wYAqe8Ddeo4TVazxiFLSWlTfLGvdF70=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=

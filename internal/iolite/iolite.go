@@ -1,6 +1,7 @@
 package iolite
 
 import (
+	cw "github.com/FatmanUK/fatgo/callwheel"
 	"fmt"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
@@ -10,6 +11,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 var db *gorm.DB
@@ -59,6 +61,8 @@ func (d DHCPServer) Run(logs chan string) {
 	var err error
 	var m idhcp.DHCP4Message
 	var c *net.UDPConn
+	epoch := time.Now()
+	idhcp.DhcpOfferTimeouts = cw.CallWheelFactory(10)
 	m.Interface, err = idhcp.ResolveInterface(d.Interface)
 	panicIfNotNull(err)
 	c, err = idhcp.BindAll4()
@@ -71,6 +75,14 @@ func (d DHCPServer) Run(logs chan string) {
 		if m.ReadPacket() != nil {
 			continue
 		}
+		thisEpoch := time.Now()
+		ticks := thisEpoch.Sub(epoch).Milliseconds() / 1000
+		epoch = thisEpoch
+		for ticks > 0 {
+			idhcp.DhcpOfferTimeouts.Tick()
+			ticks--
+		}
+		//logs <- "Finding profile"
 		p := ProfileFactory(m.Request.ClientHWAddr)
 		m.ClientIP = p.IPAddress
 		if m.ClientIP == "" {
