@@ -23,6 +23,7 @@ func main() {
 	h := iolite.HTTPServer{
 		IP: srvIP,
 		DocRoot: "./tinypxe/output",
+		DbName: "profiles.db",
 	}
 	logs := make(chan string, 1)
 	go d.Run(logs)
