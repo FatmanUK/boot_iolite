@@ -1,0 +1,73 @@
+#!/bin/sh
+
+echo "tty2!"
+
+getIp4() {
+	echo $(/sbin/ip -o a | /usr/bin/awk '/'$DEV' *inet /{split($4, a, "/"); print a[1]}')
+}
+
+getMac() {
+	echo $(/sbin/ip -o l | /usr/bin/awk -F'\\' '/'$1'/{split($2, a, " "); print a[2]}')
+}
+
+getGw() {
+	echo $(/sbin/ip r | /usr/bin/awk '/default.*'$1'/{print $3}')
+}
+
+getProfile() {
+	/usr/bin/wget -q -O$3 http://$1:80/$2
+}
+
+DEV='eth0'
+MAC=$(getMac "${DEV}")
+while [ "x${MAC}x" == "xx" ]; do
+	sleep 1
+	MAC=$(getMac "${DEV}")
+done
+
+echo Found hardware address "${MAC}".
+
+IP=$(getIp4 "${DEV}")
+while [ "x${IP}x" == "xx" ]; do
+	sleep 1
+	IP=$(getIp4 "${DEV}")
+done
+
+echo Found IP address "${IP}".
+
+ip route add default via ${IP}
+
+FILE="/root/profile"
+GW=$(getGw "${DEV}")
+while [ "x${GW}x" == "xx" ]; do
+	sleep 1
+	GW=$(getGw "${DEV}")
+done
+
+echo Found gateway "${GW}".
+
+getProfile "${GW}" "${MAC}" "${FILE}"
+while [ ! -e "${FILE}" ]; do
+	sleep 1
+	getProfile "${GW}" "${MAC}" "${FILE}"
+done
+
+echo Loading iolite-build profile.
+. "${FILE}"
+
+/bin/cat <<eof >/etc/hostname
+${HOSTNAME}
+eof
+
+# To apply new hostname:
+# sv restart get-hostname
+/bin/hostname -F /etc/hostname
+
+echo Building host: ${HOSTNAME}
+
+echo Next step: Format disks
+echo ${DISKLAYOUT} | jq
+
+echo Installing $DISTRO...
+
+#exec /bin/sleep 86400

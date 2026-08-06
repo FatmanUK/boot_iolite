@@ -8,5 +8,7 @@ system_files:
     mode: '0750'
   - path: '/usr/share/udhcpc/default.script'
     mode: '0750'
+  - path: '/opt/iolite-build.sh'
+    mode: '0750'
 ...
 # vim: set filetype=yaml

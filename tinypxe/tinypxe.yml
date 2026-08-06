@@ -107,6 +107,7 @@
     dirs:
       - '{{ workdir }}/dev'
       - '{{ workdir }}/etc'
+      - '{{ workdir }}/opt'
       - '{{ workdir }}/proc'
       - '{{ workdir }}/sys'
       - '{{ workdir }}/root'
