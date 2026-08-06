@@ -38,7 +38,7 @@ build: mod-download
 
 # Run unit tests
 test:
-	$(GO) test -cover -race -v ./...
+	GOTOOLCHAIN=go1.25.0+auto $(GO) test -cover -race -v ./...
 
 # Lint code
 lint:
