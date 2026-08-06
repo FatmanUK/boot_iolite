@@ -32,15 +32,15 @@ const MSG_TFTP_REPLY_S = "TFTP reply sent to %s"
 var offersMade map[string]bool
 
 type DHCP4Message struct {
-	Interface *net.Interface
+	Interface        *net.Interface
 	PacketConnection *ipv4.PacketConn
-	ControlMessage *ipv4.ControlMessage
-	Source net.Addr
-	Request *dhcpv4.DHCPv4
-	MessageType dhcpv4.MessageType
-	ClientIP string
-	ServerIP string
-	SubMask net.IPMask
+	ControlMessage   *ipv4.ControlMessage
+	Source           net.Addr
+	Request          *dhcpv4.DHCPv4
+	MessageType      dhcpv4.MessageType
+	ClientIP         string
+	ServerIP         string
+	SubMask          net.IPMask
 }
 
 func (m *DHCP4Message) CheckControlMessage() error {
@@ -74,17 +74,19 @@ func (m *DHCP4Message) ReadPacket() error {
 }
 
 func (m *DHCP4Message) ProcessPackets(iface string, bootScript string,
-		logs chan string) {
+	logs chan string) {
 	logs <- fmt.Sprintf(
-			MSG_RECEIVED_SS,
-			m.Request.MessageType(),
-			m.Request.ClientHWAddr,
-		)
+		MSG_RECEIVED_SS,
+		m.Request.MessageType(),
+		m.Request.ClientHWAddr,
+	)
 	switch m.Request.MessageType() {
-		case dhcpv4.MessageTypeDiscover: {
+	case dhcpv4.MessageTypeDiscover:
+		{
 			m.handleDiscover(logs)
 		}
-		case dhcpv4.MessageTypeRequest: {
+	case dhcpv4.MessageTypeRequest:
+		{
 			// After grabbing the correct bootloader from
 			// tftp, another dhcp request is sent with
 			// Option 77 (User Class) set.
@@ -267,7 +269,7 @@ func BindAll4() (*net.UDPConn, error) {
 // Wrap connection to enable out-of-band message handling
 // CRITICAL: Pass IP_PKTINFO control data with packets
 func PacketConnectionFactory(conn *net.UDPConn) (*ipv4.PacketConn,
-		error) {
+	error) {
 	p := ipv4.NewPacketConn(conn)
 	err := p.SetControlMessage(ipv4.FlagInterface, true)
 	if err != nil {

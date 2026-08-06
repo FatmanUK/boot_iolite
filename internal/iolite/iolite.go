@@ -2,11 +2,11 @@ package iolite
 
 import (
 	"fmt"
-	idhcp "iolite/internal/dhcp"
-	itftp "iolite/internal/tftp"
-	ihttp "iolite/internal/http"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
+	idhcp "iolite/internal/dhcp"
+	ihttp "iolite/internal/http"
+	itftp "iolite/internal/tftp"
 	"net"
 	"os"
 	"path/filepath"
@@ -50,8 +50,8 @@ func panicIfNotNull(err error) {
 }
 
 type DHCPServer struct {
-	IP net.IPNet
-	Interface string
+	IP         net.IPNet
+	Interface  string
 	BootScript string
 }
 
@@ -83,7 +83,7 @@ func (d DHCPServer) Run(logs chan string) {
 }
 
 type TFTPServer struct {
-	IP net.IPNet
+	IP      net.IPNet
 	DocRoot string
 }
 
@@ -92,10 +92,10 @@ func (t TFTPServer) Run(logs chan string) {
 }
 
 type HTTPServer struct {
-	IP net.IPNet
-	DocRoot string
+	IP         net.IPNet
+	DocRoot    string
 	BootScript string
-	DbName string
+	DbName     string
 }
 
 func (h HTTPServer) createBootScript() string {
@@ -118,11 +118,11 @@ func (h HTTPServer) Run(logs chan string) {
 type Profile struct {
 	gorm.Model
 	HardwareAddress string `gorm:"unique;not null"`
-	IPAddress string `gorm:"unique;not null"`
-	FQDN string `gorm:"unique;not null"`
-	Distro string
-	IsBuildEnabled bool
-	DiskLayout string
+	IPAddress       string `gorm:"unique;not null"`
+	FQDN            string `gorm:"unique;not null"`
+	Distro          string
+	IsBuildEnabled  bool
+	DiskLayout      string
 }
 
 func ProfileFactory(m net.HardwareAddr) Profile {
@@ -166,3 +166,56 @@ func LoadProfiles(b string, d string, logs chan string) error {
 	}
 	return nil
 }
+
+/*
+func createProfiles() {
+	alice := Profile{Username: "alice_dev", Email: "alice@example.com", Bio: "Go engineer", Age: 28}
+	bob := Profile{Username: "bob_design", Email: "bob@example.com", Bio: "UI/UX Designer", Age: 32}
+
+	// Use Clause to ignore or handle duplicates if re-running the script
+	db.FirstOrCreate(&alice, Profile{Username: "alice_dev"})
+	db.FirstOrCreate(&bob, Profile{Username: "bob_design"})
+	fmt.Println("Profiles saved successfully.")
+}
+
+func readProfiles(db *gorm.DB) {
+	fmt.Println("\n--- Fetching Profiles ---")
+
+	// Get all records
+	var allProfiles []Profile
+	db.Find(&allProfiles)
+	for _, p := range allProfiles {
+		fmt.Printf("ID: %d | User: %s | Age: %d | Bio: %s\n", p.ID, p.Username, p.Age, p.Bio)
+	}
+
+	// Get a single record by field
+	var singleProfile Profile
+	db.Where("username = ?", "alice_dev").First(&singleProfile)
+	fmt.Printf("Found single user: %s (%s)\n", singleProfile.Username, singleProfile.Email)
+}
+
+func updateProfile(db *gorm.DB) {
+	fmt.Println("\n--- Updating Profile ---")
+
+	// Update bio for a specific username
+	db.Model(&Profile{}).Where("username = ?", "alice_dev").Update("bio", "Senior Go Architect")
+
+	var updated Profile
+	db.Where("username = ?", "alice_dev").First(&updated)
+	fmt.Printf("Updated Bio: %s\n", updated.Bio)
+}
+
+func deleteProfile(db *gorm.DB) {
+	fmt.Println("\n--- Deleting Profile ---")
+
+	// GORM utilizes Soft Delete by default if gorm.Model is used (sets DeletedAt timestamp)
+	db.Where("username = ?", "bob_design").Delete(&Profile{})
+
+	// Verification check
+	var bob Profile
+	result := db.Where("username = ?", "bob_design").First(&bob)
+	if result.Error == gorm.ErrRecordNotFound {
+		fmt.Println("Bob was successfully soft-deleted.")
+	}
+}
+*/

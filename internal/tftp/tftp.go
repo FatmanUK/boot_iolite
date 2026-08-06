@@ -2,12 +2,12 @@ package tftp
 
 import (
 	"fmt"
-	"net"
-	"time"
+	"github.com/pin/tftp"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
-	"github.com/pin/tftp"
+	"time"
 )
 
 const MSG_TFTP_SS = "Starting embedded TFTP server on %s. Serving from %s..."
