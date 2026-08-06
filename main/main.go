@@ -11,10 +11,11 @@ func main() {
 		IP: net.ParseIP("172.168.16.1"),
 		Mask: net.CIDRMask(16, 32),
 	}
+	var bootScript = "/boot/boot.ipxe"
 	d := iolite.DHCPServer{
 		IP: srvIP,
 		Interface: "virbr0",
-		BootScript: "/boot/boot.ipxe",
+		BootScript: bootScript,
 	}
 	t := iolite.TFTPServer{
 		IP: srvIP,
@@ -23,6 +24,7 @@ func main() {
 	h := iolite.HTTPServer{
 		IP: srvIP,
 		DocRoot: "./tinypxe/output",
+		BootScript: bootScript,
 		DbName: "profiles.db",
 	}
 	logs := make(chan string, 1)

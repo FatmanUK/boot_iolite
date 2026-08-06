@@ -8,11 +8,17 @@ import (
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"net"
+	"os"
+	"path/filepath"
 )
 
 var db *gorm.DB
 
+var ipxeMessage = "Bootstrapping iolite..."
+var ipxeKernelOptions = "console=tty0 earlyprintk=tty0 tsc=reliable"
+
 const MSG_LISTEN_S = "Listening for DHCP on port 67 (interface %s)..."
+const MSG_IPXE_CREATED_S = "Created %s."
 const MSG_DB_MIGRATED_OK = "Database migration completed."
 
 const ERR_DB_CONN_V = "Failed to connect to database: %v"
@@ -20,6 +26,14 @@ const ERR_DB_MIGR_V = "Failed to migrate database: %v"
 
 const QRY_PRF_MAC = "hardware_address = ?"
 
+const FMT_IPXE_BANG_PATH = `#!ipxe
+`
+const FMT_IPXE_MESSAGE = `echo %s
+`
+const FMT_KERNEL_LINE = `kernel http://%s/boot/vmlinuz %s
+`
+const FMT_INITRD_LINE = `initrd http://%s/boot/initrd.img
+`
 const FMT_PROFILE_ENV = `#!/bin/sh
 HOSTNAME='%s'
 MAC='%s'
@@ -80,10 +94,24 @@ func (t TFTPServer) Run(logs chan string) {
 type HTTPServer struct {
 	IP net.IPNet
 	DocRoot string
+	BootScript string
 	DbName string
 }
 
+func (h HTTPServer) createBootScript() string {
+	f := filepath.Join(h.DocRoot, h.BootScript)
+	c := FMT_IPXE_BANG_PATH
+	c += fmt.Sprintf(FMT_IPXE_MESSAGE, ipxeMessage)
+	c += fmt.Sprintf(FMT_KERNEL_LINE, h.IP.IP, ipxeKernelOptions)
+	c += fmt.Sprintf(FMT_INITRD_LINE, h.IP.IP)
+	c += `boot`
+	panicIfNotNull(os.WriteFile(f, []byte(c), 0644))
+	return f
+}
+
 func (h HTTPServer) Run(logs chan string) {
+	panicIfNotNull(LoadProfiles(h.DbName, h.DocRoot, logs))
+	logs <- fmt.Sprintf(MSG_IPXE_CREATED_S, h.createBootScript())
 	panicIfNotNull(ihttp.Server(h.IP, h.DocRoot, logs))
 }
 
