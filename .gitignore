@@ -38,3 +38,5 @@ tinypxe/source/
 undionly.kpxe
 ipxe.efi
 ipxe-arm64.efi
+*db
+*sql
