@@ -65,9 +65,27 @@ eof
 
 echo Building host: ${HOSTNAME}
 
+if [ "x${DISTRO}x" == "xx" ]; then
+	echo Installing $DISTRO...
+else
+	echo Installing Linux...
+fi
+
 echo Next step: Format disks
 echo ${DISKLAYOUT} | jq
 
-echo Installing $DISTRO...
+# All that's needed is:
+# * disks laid out per spec
+# * kernel, initrd
+# * /etc/fstab
+# * grub2? install to /boot disk
+# * busybox
+# * ssh server with host and client certs established
+# * optional ssh key injected
+# * don't even need package manager at this point
+# * suppose we can optionally add a package manager
+# The rest can be done with Ansible
 
-#exec /bin/sleep 86400
+echo Press a key to reboot
+read p
+reboot
