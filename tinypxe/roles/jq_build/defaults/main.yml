@@ -1,0 +1,5 @@
+---
+jq_latest_stable: '1.8.2'
+jq_url: 'https://github.com/jqlang/jq'
+...
+# vim: set filetype=yaml

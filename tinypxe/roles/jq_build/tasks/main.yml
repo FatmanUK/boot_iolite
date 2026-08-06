@@ -1,0 +1,50 @@
+---
+- name: 'Clone latest jq tag and pull oniguruma submodule'
+  git:
+    repo: '{{ jq_url }}'
+    single_branch: yes
+    version: 'jq-{{ jq_latest_stable }}'
+    dest: '{{ workdir }}'
+    force: yes
+    recursive: yes
+
+- name: 'Autoreconf -i'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - 'autoreconf'
+      - '-i'
+
+- name: 'Configure'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - './configure'
+      - '--with-oniguruma=builtin'
+
+- name: 'Reset and run clean configuration'
+  make:
+    chdir: '{{ workdir }}'
+    target: 'clean'
+
+- name: 'Build static jq'
+  make:
+    chdir: '{{ workdir }}'
+    params:
+      LDFLAGS: '-all-static'
+      -j8:
+
+- name: 'Strip debugging symbols'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - 'strip'
+      - 'jq'
+
+- name: 'Deploy jq'
+  copy:
+    src: '{{ workdir }}/jq'
+    dest: '{{ outputdir }}/jq'
+    mode: '0750'
+...
+# vim: set filetype=yaml

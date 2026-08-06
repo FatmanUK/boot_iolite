@@ -56,6 +56,24 @@
   roles:
     - 'xfsprogs_build'
 
+- name: 'jq'
+  hosts: 'all'
+  connection: 'local'
+  run_once: yes
+  gather_facts: yes
+  vars:
+    workdir: 'source/jq'
+    outputdir: 'source/initramfs/usr/bin'
+    dirs:
+      - '{{ workdir }}'
+      - '{{ outputdir }}'
+  tags:
+    - 'never'
+    - 'json'
+    - 'jq'
+  roles:
+    - 'jq_build'
+
 - name: 'runit'
   hosts: 'all'
   connection: 'local'
