@@ -58,6 +58,17 @@ kernel_enable_options:
   - 'LIBCRC32C'           # auto-selected by xfs
   - 'CRYPTO_CRC32C'       # auto-selected by xfs
   - 'EXPORTFS'            # auto-selected by xfs
+  - 'SCSI'                # required for Core SCSI subsystem
+  - 'SCSI_LOWLEVEL'       # required for low-level SCSI drivers
+  - 'SCSI_VIRTIO'         # required for VirtIO-SCSI
+  - 'SCSI_LSI53C895A'     # required for QEMU's legacy SCSI controller
+  - 'USB_SUPPORT'         # required for USB menu/subsystem
+  - 'USB'                 # required for Core USB driver
+  - 'USB_PCI'             # required for USB controllers on PCI bus
+  #- 'USB_ANNOUNCE_NEW_DEVICES' # Useful for debugging: prints USB devices to dmesg on plug
+  - 'USB_XHCI_HCD'        # required for USB 3.0 (xHCI) controller
+  - 'USB_EHCI_HCD'        # required for USB 2.0 (EHCI) controller
+  - 'USB_STORAGE'         # required for USB flash/external drives
 kernel_finger_url: 'https://www.kernel.org/finger_banner'
 kernel_src_domain: 'git.kernel.org'
 kernel_src_path: '/pub/scm/linux/kernel/git/stable/linux-stable.git'
