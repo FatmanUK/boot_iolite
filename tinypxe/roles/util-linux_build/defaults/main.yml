@@ -1,0 +1,10 @@
+---
+utillinux_delimiter: ','
+utillinux_latest_stable: '2.42.2'
+utillinux_ldflags:
+  - '-static'
+utillinux_programs:
+  - 'sfdisk'
+utillinux_url: 'https://github.com/util-linux/util-linux'
+...
+# vim: set filetype=yaml

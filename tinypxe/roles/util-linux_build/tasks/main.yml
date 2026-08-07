@@ -1,0 +1,65 @@
+---
+- name: 'Clone stable util-linux tag'
+  git:
+    repo: '{{ utillinux_url }}'
+    single_branch: yes
+    version: 'v{{ utillinux_latest_stable }}'
+    dest: '{{ workdir }}'
+    force: yes
+    recursive: yes
+
+- name: 'Clean repo'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - 'git'
+      - 'clean'
+      - '-xdf'
+
+- name: 'Autogen'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - './autogen.sh'
+
+# disappeared. wtf?
+#- name: 'Reset and run clean configuration'
+#  make:
+#    chdir: '{{ workdir }}'
+#    target: 'distclean'
+
+- name: 'Configure'
+  vars:
+    flags: '{{ utillinux_ldflags | join(utillinux_delimiter) }}'
+    progs: '{{ utillinux_programs | join(utillinux_delimiter) }}'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - './configure'
+      - 'LDFLAGS={{ flags }}'
+      - '--enable-static-programs={{ progs }}'
+      - '--disable-irqtop'
+      - '--without-python'
+    chdir: '{{ workdir }}'
+
+- name: 'Build static util-linux utils'
+  make:
+    chdir: '{{ workdir }}'
+    jobs: 8
+
+- name: 'Strip debugging symbols'
+  loop: '{{ utillinux_programs }}'
+  command:
+    chdir: '{{ workdir }}'
+    argv:
+      - '/usr/bin/strip'
+      - '{{ item }}'
+
+- name: 'Deploy util-linux'
+  loop: '{{ utillinux_programs }}'
+  copy:
+    src: '{{ workdir }}/{{ item }}'
+    dest: '{{ outputdir }}/{{ item }}'
+    mode: '0750'
+...
+# vim: set filetype=yaml

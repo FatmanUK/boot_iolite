@@ -74,6 +74,24 @@
   roles:
     - 'jq_build'
 
+- name: 'util-linux'
+  hosts: 'all'
+  connection: 'local'
+  run_once: yes
+  gather_facts: no
+  vars:
+    workdir: 'source/util-linux'
+    outputdir: 'source/initramfs/usr/bin'
+    dirs:
+      - '{{ workdir }}'
+      - '{{ outputdir }}'
+  tags:
+    - 'never'
+    - 'util-linux'
+    - 'util'
+  roles:
+    - 'util-linux_build'
+
 - name: 'runit'
   hosts: 'all'
   connection: 'local'
