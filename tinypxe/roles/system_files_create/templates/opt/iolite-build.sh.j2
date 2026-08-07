@@ -1,7 +1,5 @@
 #!/bin/sh
 
-echo "tty2!"
-
 getIp4() {
 	echo $(/sbin/ip -o a | /usr/bin/awk '/'$DEV' *inet /{split($4, a, "/"); print a[1]}')
 }
@@ -17,6 +15,14 @@ getGw() {
 getProfile() {
 	/usr/bin/wget -q -O$3 http://$1:80/$2
 }
+
+rebootSystem() {
+	echo Press ENTER key to reboot
+	read p
+	reboot
+}
+
+sleep 5
 
 DEV='eth0'
 MAC=$(getMac "${DEV}")
@@ -63,7 +69,7 @@ eof
 # sv restart get-hostname
 /bin/hostname -F /etc/hostname
 
-echo Building host: ${HOSTNAME}
+echo Building host: $(/bin/uname -n)
 
 if [ "x${DISTRO}x" == "xx" ]; then
 	echo Installing $DISTRO...
@@ -72,7 +78,49 @@ else
 fi
 
 echo Next step: Format disks
-echo ${DISKLAYOUT} | jq
+DISKS=$(echo "${DISKLAYOUT}" | jq -r '.[].device')
+
+# Check disks present
+for DISK in ${DISKS}; do
+	M=$(stat -t "/dev/${DISK}" 2>&1) ; RC=$?
+	if [ ${RC} -ne 0 ]; then
+		/bin/sv down .
+		echo Not found: /dev/${DISK}
+		rebootSystem
+	fi
+done
+echo All disks present.
+
+# Format disks.
+for DISK in ${DISKS}; do
+	VDA_PARTS=$(echo ${DISKLAYOUT} | jq -r '[.[] | select(.device == "'${DISK}'") | .parts[]]')
+	LEN=$(echo $VDA_PARTS | jq 'length')
+	for I in $(seq 0 $((${LEN}-1))); do
+		#PART=$(echo $VDA_PARTS | jq '.['${I}']')
+		MOUNT=$(echo $VDA_PARTS | jq -r '.['${I}'].mount')
+		SIZE=$(echo $VDA_PARTS | jq -r '.['${I}'].size')
+		FS=$(echo $VDA_PARTS | jq -r '.['${I}'].fs')
+		echo mount $MOUNT size $SIZE fs $FS
+	done
+
+	#echo 
+
+	#PARTS=$(echo $DISKLAYOUT | jq -r '[.[] | select(.device == "${DISK}") | .parts[]]')
+
+#<<<$DISKLAYOUT jq -r '[.[] | select(.device == "vda") | .parts[]][0]'
+
+#<<<$DISKLAYOUT jq -r '.[] | select(.device == "vda") | .parts'
+
+done
+
+# disks
+#<<<$DISKLAYOUT jq -r '.[].device'
+
+# order of mounting
+#<<<$DISKLAYOUT jq -r '[.[].parts[]] | sort_by(.mount)'
+
+# each disk
+#<<<$DISKLAYOUT jq -r '.[] | select(.device == "vda")'
 
 # All that's needed is:
 # * disks laid out per spec
@@ -86,6 +134,4 @@ echo ${DISKLAYOUT} | jq
 # * suppose we can optionally add a package manager
 # The rest can be done with Ansible
 
-echo Press a key to reboot
-read p
-reboot
+rebootSystem

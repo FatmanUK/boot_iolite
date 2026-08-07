@@ -82,7 +82,6 @@ func (d DHCPServer) Run(logs chan string) {
 			idhcp.DhcpOfferTimeouts.Tick()
 			ticks--
 		}
-		//logs <- "Finding profile"
 		p := ProfileFactory(m.Request.ClientHWAddr)
 		m.ClientIP = p.IPAddress
 		if m.ClientIP == "" {
@@ -150,6 +149,8 @@ func ProfileFactory(m net.HardwareAddr) Profile {
 func LoadProfiles(b string, d string, logs chan string) error {
 	var err error
 	gc := gorm.Config{}
+	// TODO: optionally replace with postgresql
+	// Then have repeated tries to connect instead of error
 	db, err = gorm.Open(sqlite.Open(b), &gc)
 	if err != nil {
 		return fmt.Errorf(ERR_DB_CONN_V, err)

@@ -38,7 +38,7 @@
   command:
     chdir: '{{ workdir }}'
     argv:
-      - 'strip'
+      - '/usr/bin/strip'
       - 'jq'
 
 - name: 'Deploy jq'

@@ -28,9 +28,6 @@ const MSG_TFTP_REPLY_S = "TFTP reply sent to %s"
 
 var DhcpOfferTimeouts *cw.CallWheel
 
-// BUG: this system isn't right.
-// use gorm for this?
-// use a Callwheel to time out the offer.
 var offersMade map[string]bool
 
 type DHCP4Message struct {
