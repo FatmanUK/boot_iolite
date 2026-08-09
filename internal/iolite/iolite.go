@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	//"strings"
 	"time"
 )
 
@@ -122,28 +123,98 @@ func (h HTTPServer) createBootScript() string {
 
 func (h HTTPServer) Run(logs chan string) {
 	panicIfNotNull(LoadProfiles(h.DbName, h.DocRoot, logs))
+	//createLayouts(logs)
+	//createProfiles(logs)
 	logs <- fmt.Sprintf(MSG_IPXE_CREATED_S, h.createBootScript())
 	panicIfNotNull(ihttp.Server(h.IP, h.DocRoot, logs))
 }
 
-type Profile struct {
-	gorm.Model
-	HardwareAddress string `gorm:"unique;not null"`
-	IPAddress       string `gorm:"unique;not null"`
-	FQDN            string `gorm:"unique;not null"`
-	Distro          string
-	IsBuildEnabled  bool
-	DiskLayout      string
+func MakeTestData(logs chan string) error {
+	var err error
+	bootTemplate := Template{
+		Name:       "Boot Template",
+		SectorSize: 512,
+		Partitions: []MBRPartition{
+			{Start: 2048, Size: 1048576, Type: "0x0C", IsBootable: true},
+			{Start: 1050624, Size: 20971520, Type: "0x83", IsBootable: false},
+		},
+	}
+
+	layout1 := Layout{
+		Name: "standard-dos-layout",
+		Templates: map[string]Template{
+			"boot": bootTemplate,
+			"data": {
+				Name:       "Data Template",
+				SectorSize: 4096,
+				Partitions: []MBRPartition{
+					{Start: 22020096, Size: 104857600, Type: "0x07", IsBootable: false},
+				},
+			},
+		},
+	}
+
+	layout2 := Layout{
+		Name: "minimal-layout",
+		Templates: map[string]Template{
+			"primary-boot": bootTemplate, // same template, reused under a different key
+		},
+	}
+
+/*
+	fiveLvm := DiskTemplate{
+		Name: "MBR_5_LVM",
+		Type: "mbr",
+		SectorSize: 512,
+		Partitions: []MBRPartitionTemplate{
+			MBRPartitionTemplate{
+				Start: 63,
+				Size: 10485697,
+				Type: "8e",
+				IsBootable: false,
+			},
+		},
+	}
+*/
+	err = db.Create(&layout1).Error
+	if err != nil {
+		return fmt.Errorf("create layout1: %v", err)
+	}
+	fmt.Printf("stored layout1 id=%d\n", layout1.ID)
+	// layout1.Templates["boot"].ID is now set (from BeforeSave) — reuse it
+	// explicitly so layout2 points at the same Template row instead of
+	// creating a duplicate.
+	layout2.Templates["primary-boot"] = layout1.Templates["boot"]
+
+	err = db.Create(&layout2).Error
+	if err != nil {
+		return fmt.Errorf("create layout2: %v", err)
+	}
+	fmt.Printf("stored layout2 id=%d\n", layout2.ID)
+	return nil
 }
 
-func ProfileFactory(m net.HardwareAddr) Profile {
-	var p Profile
-	macBytes := idhcp.StringFromMACBytes(m)
-	db.Where(QRY_PRF_MAC, macBytes).First(&p)
-	if p.IsBuildEnabled {
-		return p
+func WriteProfileEnvFiles(logs chan string) {
+/*
+	// Get all records
+	var allProfiles []Profile
+	db.Find(&allProfiles)
+	for _, p := range allProfiles {
+		if p.IsBuildEnabled {
+			l := DiskLayout{}.String(p.Layout)
+			c := []byte(fmt.Sprintf(
+				FMT_PROFILE_ENV,
+				p.FQDN,
+				p.HardwareAddress,
+				p.IPAddress,
+				p.Distro,
+				l,
+			))
+			f := filepath.Join(d, p.HardwareAddress)
+			panicIfNotNull(os.WriteFile(f, c, 0644))
+		}
 	}
-	return Profile{}
+*/
 }
 
 func LoadProfiles(b string, d string, logs chan string) error {
@@ -155,80 +226,18 @@ func LoadProfiles(b string, d string, logs chan string) error {
 	if err != nil {
 		return fmt.Errorf(ERR_DB_CONN_V, err)
 	}
-	err = db.AutoMigrate(&Profile{})
+	err = db.AutoMigrate(
+		&Profile{},
+		&Layout{},
+		&LayoutTemplate{},
+		&Template{},
+		&MBRPartition{},
+	)
 	if err != nil {
 		return fmt.Errorf(ERR_DB_MIGR_V, err)
 	}
 	logs <- MSG_DB_MIGRATED_OK
-	// Get all records
-	var allProfiles []Profile
-	db.Find(&allProfiles)
-	for _, p := range allProfiles {
-		if p.IsBuildEnabled {
-			c := []byte(fmt.Sprintf(
-				FMT_PROFILE_ENV,
-				p.FQDN,
-				p.HardwareAddress,
-				p.IPAddress,
-				p.Distro,
-				p.DiskLayout,
-			))
-			f := filepath.Join(d, p.HardwareAddress)
-			panicIfNotNull(os.WriteFile(f, c, 0644))
-		}
-	}
+	MakeTestData(logs)
+	WriteProfileEnvFiles(logs)
 	return nil
 }
-
-/*
-func createProfiles() {
-	alice := Profile{Username: "alice_dev", Email: "alice@example.com", Bio: "Go engineer", Age: 28}
-	bob := Profile{Username: "bob_design", Email: "bob@example.com", Bio: "UI/UX Designer", Age: 32}
-
-	// Use Clause to ignore or handle duplicates if re-running the script
-	db.FirstOrCreate(&alice, Profile{Username: "alice_dev"})
-	db.FirstOrCreate(&bob, Profile{Username: "bob_design"})
-	fmt.Println("Profiles saved successfully.")
-}
-
-func readProfiles(db *gorm.DB) {
-	fmt.Println("\n--- Fetching Profiles ---")
-
-	// Get all records
-	var allProfiles []Profile
-	db.Find(&allProfiles)
-	for _, p := range allProfiles {
-		fmt.Printf("ID: %d | User: %s | Age: %d | Bio: %s\n", p.ID, p.Username, p.Age, p.Bio)
-	}
-
-	// Get a single record by field
-	var singleProfile Profile
-	db.Where("username = ?", "alice_dev").First(&singleProfile)
-	fmt.Printf("Found single user: %s (%s)\n", singleProfile.Username, singleProfile.Email)
-}
-
-func updateProfile(db *gorm.DB) {
-	fmt.Println("\n--- Updating Profile ---")
-
-	// Update bio for a specific username
-	db.Model(&Profile{}).Where("username = ?", "alice_dev").Update("bio", "Senior Go Architect")
-
-	var updated Profile
-	db.Where("username = ?", "alice_dev").First(&updated)
-	fmt.Printf("Updated Bio: %s\n", updated.Bio)
-}
-
-func deleteProfile(db *gorm.DB) {
-	fmt.Println("\n--- Deleting Profile ---")
-
-	// GORM utilizes Soft Delete by default if gorm.Model is used (sets DeletedAt timestamp)
-	db.Where("username = ?", "bob_design").Delete(&Profile{})
-
-	// Verification check
-	var bob Profile
-	result := db.Where("username = ?", "bob_design").First(&bob)
-	if result.Error == gorm.ErrRecordNotFound {
-		fmt.Println("Bob was successfully soft-deleted.")
-	}
-}
-*/
