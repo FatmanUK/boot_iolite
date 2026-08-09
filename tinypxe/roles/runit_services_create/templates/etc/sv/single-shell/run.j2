@@ -4,4 +4,6 @@
 export SVDIR='/var/service'
 cd /
 
+echo Shell on tty4. >/dev/tty4
+
 exec /usr/bin/setsid /bin/sh -c 'exec /bin/sh </dev/tty4 >/dev/tty4 2>&1'

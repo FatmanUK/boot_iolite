@@ -40,7 +40,6 @@
       - '--enable-static-programs={{ progs }}'
       - '--disable-irqtop'
       - '--without-python'
-    chdir: '{{ workdir }}'
 
 - name: 'Build static util-linux utils'
   make:
@@ -53,12 +52,12 @@
     chdir: '{{ workdir }}'
     argv:
       - '/usr/bin/strip'
-      - '{{ item }}'
+      - '{{ item }}.static'
 
 - name: 'Deploy util-linux'
   loop: '{{ utillinux_programs }}'
   copy:
-    src: '{{ workdir }}/{{ item }}'
+    src: '{{ workdir }}/{{ item }}.static'
     dest: '{{ outputdir }}/{{ item }}'
     mode: '0750'
 ...

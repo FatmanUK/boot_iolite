@@ -89,6 +89,7 @@
     - 'never'
     - 'util-linux'
     - 'util'
+    - 'sfdisk'
   roles:
     - 'util-linux_build'
 
