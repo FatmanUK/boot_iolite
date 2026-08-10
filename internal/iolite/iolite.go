@@ -1,8 +1,8 @@
 package iolite
 
 import (
-	cw "github.com/FatmanUK/fatgo/callwheel"
 	"fmt"
+	cw "github.com/FatmanUK/fatgo/callwheel"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	idhcp "iolite/internal/dhcp"
@@ -36,13 +36,6 @@ const FMT_IPXE_MESSAGE = `echo %s
 const FMT_KERNEL_LINE = `kernel http://%s/boot/vmlinuz %s
 `
 const FMT_INITRD_LINE = `initrd http://%s/boot/initrd.img
-`
-const FMT_PROFILE_ENV = `#!/bin/sh
-HOSTNAME='%s'
-MAC='%s'
-IP='%s'
-DISTRO='%s'
-DISKLAYOUT='%s'
 `
 
 func panicIfNotNull(err error) {
@@ -123,98 +116,151 @@ func (h HTTPServer) createBootScript() string {
 
 func (h HTTPServer) Run(logs chan string) {
 	panicIfNotNull(LoadProfiles(h.DbName, h.DocRoot, logs))
-	//createLayouts(logs)
-	//createProfiles(logs)
 	logs <- fmt.Sprintf(MSG_IPXE_CREATED_S, h.createBootScript())
 	panicIfNotNull(ihttp.Server(h.IP, h.DocRoot, logs))
 }
 
 func MakeTestData(logs chan string) error {
 	var err error
-	bootTemplate := Template{
+
+	bootTemplate := &Template{
 		Name:       "Boot Template",
 		SectorSize: 512,
-		Partitions: []MBRPartition{
-			{Start: 2048, Size: 1048576, Type: "0x0C", IsBootable: true},
-			{Start: 1050624, Size: 20971520, Type: "0x83", IsBootable: false},
-		},
-	}
-
-	layout1 := Layout{
-		Name: "standard-dos-layout",
-		Templates: map[string]Template{
-			"boot": bootTemplate,
-			"data": {
-				Name:       "Data Template",
-				SectorSize: 4096,
-				Partitions: []MBRPartition{
-					{Start: 22020096, Size: 104857600, Type: "0x07", IsBootable: false},
-				},
+		Partitions: []*MBRPartition{
+			&MBRPartition{
+				Start:      2048,
+				Size:       1048576,
+				Type:       "0x0c",
+				IsBootable: true,
 			},
-		},
-	}
-
-	layout2 := Layout{
-		Name: "minimal-layout",
-		Templates: map[string]Template{
-			"primary-boot": bootTemplate, // same template, reused under a different key
-		},
-	}
-
-/*
-	fiveLvm := DiskTemplate{
-		Name: "MBR_5_LVM",
-		Type: "mbr",
-		SectorSize: 512,
-		Partitions: []MBRPartitionTemplate{
-			MBRPartitionTemplate{
-				Start: 63,
-				Size: 10485697,
-				Type: "8e",
+			&MBRPartition{
+				Start:      1050624,
+				Size:       20971520,
+				Type:       "0x83",
 				IsBootable: false,
 			},
 		},
 	}
-*/
-	err = db.Create(&layout1).Error
-	if err != nil {
-		return fmt.Errorf("create layout1: %v", err)
-	}
-	fmt.Printf("stored layout1 id=%d\n", layout1.ID)
-	// layout1.Templates["boot"].ID is now set (from BeforeSave) — reuse it
-	// explicitly so layout2 points at the same Template row instead of
-	// creating a duplicate.
-	layout2.Templates["primary-boot"] = layout1.Templates["boot"]
 
-	err = db.Create(&layout2).Error
+	dataTemplate := &Template{
+		Name:       "Data Template",
+		SectorSize: 4096,
+		Partitions: []*MBRPartition{
+			&MBRPartition{
+				Start:      22020096,
+				Size:       104857600,
+				Type:       "0x07",
+				IsBootable: false,
+			},
+		},
+	}
+
+	fiveLvm := &Template{
+		Name:       "MBR_5_LVM",
+		SectorSize: 512,
+		Partitions: []*MBRPartition{
+			&MBRPartition{
+				Start:      63,
+				Size:       10485697,
+				Type:       "0x8e",
+				IsBootable: false,
+			},
+		},
+	}
+
+	fiveLinux := &Template{
+		Name:       "MBR_5_Linux_Bootable",
+		SectorSize: 512,
+		Partitions: []*MBRPartition{
+			&MBRPartition{
+				Start:      63,
+				Size:       10485697,
+				Type:       "0x83",
+				IsBootable: true,
+			},
+		},
+	}
+
+	fiveSwapOneLvmRest := &Template{
+		Name:       "MBR_5_Swap+LVM",
+		SectorSize: 512,
+		Partitions: []*MBRPartition{
+			&MBRPartition{
+				Start:      63,
+				Size:       2097152,
+				Type:       "0x82",
+				IsBootable: false,
+			},
+			&MBRPartition{
+				Start:      2097215,
+				Size:       8388545,
+				Type:       "0x8e",
+				IsBootable: false,
+			},
+		},
+	}
+
+	layout1 := &Layout{
+		Name: "standard-dos-layout",
+		Templates: map[string]*Template{
+			"boot": bootTemplate,
+			"data": dataTemplate,
+		},
+	}
+
+	layout2 := &Layout{
+		Name: "minimal-layout",
+		Templates: map[string]*Template{
+			"primary-boot": bootTemplate,
+		},
+	}
+
+	layout3 := &Layout{
+		Name: "Plain VM",
+		Templates: map[string]*Template{
+			"vda": fiveLvm,
+			"sda": fiveLinux,
+			"sdb": fiveSwapOneLvmRest,
+			"sdc": dataTemplate,
+		},
+	}
+
+	p1 := &Profile{
+		Layout:          layout3,
+		HardwareAddress: "52:54:00:76:de:e5",
+		IPAddress:       "172.168.16.32",
+		FQDN:            "glarg01.dreamtrack.net",
+		Distro:          "voidLinux",
+		IsBuildEnabled:  true,
+	}
+
+	p2 := &Profile{
+		Layout:          layout1,
+		HardwareAddress: "94:c6:91:a0:36:98",
+		IPAddress:       "172.168.16.214",
+		FQDN:            "vlissides.dreamtrack.net",
+		Distro:          "voidLinux",
+		IsBuildEnabled:  false,
+	}
+
+	err = db.Create(p1).Error
+	if err != nil {
+		return fmt.Errorf("create p1: %v", err)
+	}
+
+	err = db.Create(p2).Error
+	if err != nil {
+		return fmt.Errorf("create p2: %v", err)
+	}
+	logs <- "Profiles saved successfully."
+
+	err = db.Create(layout2).Error
 	if err != nil {
 		return fmt.Errorf("create layout2: %v", err)
 	}
 	fmt.Printf("stored layout2 id=%d\n", layout2.ID)
-	return nil
-}
 
-func WriteProfileEnvFiles(logs chan string) {
-/*
-	// Get all records
-	var allProfiles []Profile
-	db.Find(&allProfiles)
-	for _, p := range allProfiles {
-		if p.IsBuildEnabled {
-			l := DiskLayout{}.String(p.Layout)
-			c := []byte(fmt.Sprintf(
-				FMT_PROFILE_ENV,
-				p.FQDN,
-				p.HardwareAddress,
-				p.IPAddress,
-				p.Distro,
-				l,
-			))
-			f := filepath.Join(d, p.HardwareAddress)
-			panicIfNotNull(os.WriteFile(f, c, 0644))
-		}
-	}
-*/
+	return nil
 }
 
 func LoadProfiles(b string, d string, logs chan string) error {
@@ -237,7 +283,17 @@ func LoadProfiles(b string, d string, logs chan string) error {
 		return fmt.Errorf(ERR_DB_MIGR_V, err)
 	}
 	logs <- MSG_DB_MIGRATED_OK
-	MakeTestData(logs)
-	WriteProfileEnvFiles(logs)
+	//MakeTestData(logs)
+
+	// Get all records
+	var allProfiles []Profile
+	db.Preload("Layout.TemplatesM.Partitions").Find(&allProfiles)
+	logs <- fmt.Sprintf("Found %d profiles", len(allProfiles))
+	for _, p := range allProfiles {
+		if p.IsBuildEnabled {
+			p.Write(d, logs)
+		}
+	}
+	logs <- "Written profile env files"
 	return nil
 }

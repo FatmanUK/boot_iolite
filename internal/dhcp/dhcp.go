@@ -282,7 +282,7 @@ func RecordOffer(s string) {
 		offersMade = make(map[string]bool)
 	}
 	offersMade[s] = true
-	DhcpOfferTimeouts.Insert(30, func(){
+	DhcpOfferTimeouts.Insert(30, func() {
 		RescindOffer(s)
 	})
 }
