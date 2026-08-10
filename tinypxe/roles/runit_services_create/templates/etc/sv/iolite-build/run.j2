@@ -1,7 +1,3 @@
 #!/bin/sh
 
-# Reset environment parameters
-export SVDIR='/var/service'
-cd /
-
-exec /usr/bin/setsid /bin/sh -c '/usr/bin/chvt 2; /bin/sh /opt/iolite-build.sh </dev/tty2 >/dev/tty2 2>&1; /bin/sv down .'
+exec /usr/bin/setsid /bin/sh -c '/usr/bin/chvt 2; /bin/sh /opt/iolite-build.sh </dev/tty2 >/dev/tty2 2>&1; /bin/sleep 86400'
