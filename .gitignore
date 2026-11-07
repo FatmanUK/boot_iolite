@@ -1,0 +1,10 @@
+legacy/
+/iolite
+www/boot/
+tftpboot/*.kpxe
+tftpboot/*.efi
+image/src/
+image/root/
+*.db
+*.qcow2
+*.iso
