@@ -7,9 +7,12 @@ self-built Linux initramfs, which then reads a per-machine profile from the serv
 and installs an OS onto local disks according to a stored partition layout.
 
 ### Next 3 Steps
-1. Phase 1a: `internal/model`, `internal/store`, `internal/render` with tests.
-2. Phase 1b: `internal/dhcp` (stateless, option 93 arch → bootfile) with tests.
-3. Phase 1c: `internal/tftp`, `internal/httpd`, `main`; first manual run.
+1. Phase 2: `image/Makefile`, `versions.mk`, `scripts/kernel.sh` with
+   `config/kernel.cfg`; build and stage `www/boot/vmlinuz`.
+2. Phase 2: static busybox, runit, util-linux (sfdisk, blkid), xfsprogs,
+   e2fsprogs (mke2fs), Void xbps-install, iPXE (undionly.kpxe, ipxe.efi).
+3. Phase 2: `image/rootfs/` tree and `gen_init_cpio` packing; QEMU direct
+   boot to a shell under BIOS and OVMF.
 
 ## 2. State of Play
 
@@ -28,8 +31,37 @@ initrd, profiles and Void packages all go over HTTP. QEMU's NIC ROM is already
 iPXE, which is why HTTP-only worked on QEMU but not on metal. HTTPS is a later
 phase (iPXE must be built with `DOWNLOAD_PROTO_HTTPS` and `TRUST=ca.crt`).
 
+### Server (landed in Phase 1, commits 59a15b6 5bef82f and this one)
+
+- `main/main.go`: flags `-iface -ip <cidr> -www -tftp -db -seed -dns
+  -void-upstream -kernel-args -http -tftp-addr -lease`; opens the DB,
+  migrates, seeds an empty DB from `seed/profiles.sql`, runs DHCP, TFTP and
+  HTTP goroutines and prints their log channel. Needs root for ports 67/69/80.
+- `internal/dhcp`: stateless. Looks the MAC up; unknown or disabled → silent.
+  DISCOVER → OFFER; REQUEST → ACK if the requested IP matches, else NAK.
+  Replies carry yiaddr, siaddr, option 54, netmask, router (= server), lease,
+  optional DNS, options 66/67 and the BOOTP `file` field. Boot file: user
+  class `iPXE` → `http://<server>/boot/boot.ipxe`; else option 93 arch 0 →
+  `undionly.kpxe`, 6/7/9 → `ipxe.efi`, 11 → `ipxe-arm64.efi`, other → ignored.
+  Socket: bind 0.0.0.0:67 with IP_PKTINFO, drop packets from other
+  interfaces, reply broadcast on the arrival interface.
+- `internal/tftp`: read-only `pin/tftp` server rooted at `tftpboot/`, path
+  traversal refused.
+- `internal/httpd`: `GET /boot/boot.ipxe` (rendered), `GET /boot/*` (files
+  from `www/boot`), `GET /profiles/<mac>` (rendered env, 404 when disabled),
+  `POST /profiles/<mac>/status` with `state=done` (disables the profile),
+  `/void/*` reverse-proxied to `-void-upstream`, `GET /` index. `/admin/`
+  arrives in Phase 4.
+- `internal/render`: sfdisk script per disk (`label: dos|gpt`, `name=` for
+  GPT, `size` omitted when 0, `nvme0n1p1` style names), the profile env file
+  (`HOSTNAME MAC IP DISTRO REPO PACKAGES AUTHORIZED_KEYS ROOT_PASSWORD_HASH
+  DISKS SFDISK_<dev> PARTS`; `PARTS` is `dev:fs:mount:opts` in mount order,
+  swap last) and `boot.ipxe`.
+- `internal/store`: `Open Migrate SeedIfEmpty ProfileByMAC EnabledProfiles
+  MarkDone`; GORM join table registered with `SetupJoinTable`.
+
 Database:
-profiles.db (SQLite via GORM): Profile → Layout → Template → MBRPartition
+profiles.db (SQLite via GORM): Profile → Layout → Template → Partition
 
 The database currently only specifies disk layouts per profiled MAC address.
 Currently we only have MBRPartition but GPT and EFI should work too.
@@ -493,4 +525,7 @@ LABEL smallest_linux
 
 ## 5. Tested & Passing Status Confirmation
 
-None yet.
+Phase 1 (2026-11-07): `make lint test build` green. Unit coverage: config
+98 %, dhcp 37 % (packet building; socket loop untested), httpd 79 %, render
+96 %, store 84 %, tftp 77 %. Not yet run as root against a real client; the
+first live test is Phase 3's VM boot.

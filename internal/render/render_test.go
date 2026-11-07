@@ -113,7 +113,7 @@ func TestProfileEnv(t *testing.T) {
 }
 
 func TestBootScript(t *testing.T) {
-	got := BootScript("172.168.16.1", "console=tty0")
+	got := BootScript("http://172.168.16.1", "console=tty0")
 	want := "#!ipxe\necho Bootstrapping iolite...\n" +
 		"kernel http://172.168.16.1/boot/vmlinuz console=tty0\n" +
 		"initrd http://172.168.16.1/boot/initrd.img\nboot\n"

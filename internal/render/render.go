@@ -154,12 +154,12 @@ func depth(mount string) int {
 	return strings.Count(mount, "/")
 }
 
-// BootScript renders boot.ipxe for iPXE clients.
-func BootScript(host, kernelArgs string) string {
+// BootScript renders boot.ipxe for iPXE clients; base is the
+// http://host[:port] the server is reachable at.
+func BootScript(base, kernelArgs string) string {
 	return "#!ipxe\n" +
 		"echo Bootstrapping iolite...\n" +
-		fmt.Sprintf("kernel http://%s/boot/vmlinuz %s\n",
-			host, kernelArgs) +
-		fmt.Sprintf("initrd http://%s/boot/initrd.img\n", host) +
+		fmt.Sprintf("kernel %s/boot/vmlinuz %s\n", base, kernelArgs) +
+		fmt.Sprintf("initrd %s/boot/initrd.img\n", base) +
 		"boot\n"
 }
